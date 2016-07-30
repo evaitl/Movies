@@ -1,4 +1,4 @@
-package com.vaitls.movie;
+package com.vaitls.movies;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
