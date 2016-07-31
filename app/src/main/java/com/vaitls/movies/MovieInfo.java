@@ -2,6 +2,8 @@ package com.vaitls.movies;
 
 /**
  * Created by evaitl on 7/30/16.
+ *
+ * The fields are created to match the json information in a themoviedb api call.
  */
 public class MovieInfo {
     private boolean adult;
@@ -19,6 +21,11 @@ public class MovieInfo {
     private float vote_average;
     private int vote_count;
 
+    /**
+     * Private constructor: Only create these with gson.
+     */
+    private MovieInfo() {}
+    // Generated getters.
     public boolean isAdult() {
         return adult;
     }

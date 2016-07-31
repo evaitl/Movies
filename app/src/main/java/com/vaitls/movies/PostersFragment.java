@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.io.IOException;
 
@@ -28,24 +29,30 @@ public class PostersFragment extends Fragment{
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        if(!isOnline()){
+ /*       if(!isOnline()){
             // XXX Put up the sad face fragment and return.
-        }
+        }*/
+
         //return super.onCreateView(inflater, container, savedInstanceState);
         View v=inflater.inflate(R.layout.fragment_posters, container, false);
         mPostersRecylerView = (RecyclerView) v.findViewById(R.id.fragment_posters_recycler_view);
         mPostersRecylerView.setLayoutManager(new GridLayoutManager(getActivity(),3));
+
+        setupAdapter();
         return v;
     }
-
+    private void setupAdapter(){
+        if(isAdded()){
+            MovieDataCache dbc=MovieDataCache.getInstance(getString(R.string.themoviedb_key));
+            PhotoAdapter adapter= new PhotoAdapter(this,dbc);
+            mPostersRecylerView.setAdapter(adapter);
+        }
+    }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        String key=getResources().getString(R.string.themoviedb_key);
-        MoviedbFetcher.getInstance(key);
 
-        new FetchItemsTask().execute();
     }
     public boolean isOnline() {
         ConnectivityManager cm =
@@ -54,12 +61,5 @@ public class PostersFragment extends Fragment{
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
-    class FetchItemsTask extends AsyncTask<Void, Void, Void>{
-        @Override
-        protected Void doInBackground(Void... voids) {
-            String key=getResources().getString(R.string.themoviedb_key);
-            new MoviedbFetcher(key).fetchItems();
-            return null;
-        }
-    }
+
 }

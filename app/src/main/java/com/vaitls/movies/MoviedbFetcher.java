@@ -1,9 +1,9 @@
 package com.vaitls.movies;
 
-import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.app.Activity;
+import android.app.Application;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -20,58 +20,28 @@ import java.net.URL;
  */
 public class MoviedbFetcher {
     private final static String TAG = MoviedbFetcher.class.getSimpleName();
-
-    ;
     static MoviedbFetcher sMoviedbFetcher;
     private String mApiKey;
+    private MovieDataCache mMovieDataCache;
 
-    private MoviedbFetcher(String apiKey) {
-        mApiKey = apiKey;
+    private MoviedbFetcher(MovieDataCache mdc,String apiKey) {
+        mMovieDataCache = mdc;
+        mApiKey =apiKey;
     }
 
-    public static MoviedbFetcher getInstance(String apiKey) {
-        if (sMoviedbFetcher == null && apiKey != null) {
-            sMoviedbFetcher = new MoviedbFetcher(apiKey);
+    public static MoviedbFetcher getInstance(MovieDataCache mdc, String apiKey) {
+        if (sMoviedbFetcher == null) {
+            assert mdc != null;
+            sMoviedbFetcher = new MoviedbFetcher(mdc,apiKey);
         }
         return sMoviedbFetcher;
     }
 
-
-
-    public void fetchItems() {
-        try {
-            String url = Uri.parse("http://api.themoviedb.org/3/movie")
-                    .buildUpon()
-                    .appendPath("top_rated")
-                    // .appendPath("popular")
-                    .appendQueryParameter("api_key", mApiKey)
-                    .build().toString();
-            Log.i(TAG, "URL: " + url);
-            String jsonString = getUrlString(url);
-            Log.i(TAG, "JSON: " + jsonString);
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to fetch: ", e);
-        }
+    private String getUrlString(String urlString) throws IOException {
+        return new String(getUrlBytes(urlString));
     }
 
-    public MoviePage fetchPage(MovieListType mlt, int pageNo) {
-        try {
-            String url = Uri.parse("http://api.themoviedb.org/3/movie")
-                    .buildUpon()
-                    .appendPath(mlt.toString())
-                    .appendQueryParameter("api_key", mApiKey)
-                    .build().toString();
-            String jsonString = getUrlString(url);
-            Gson gson = (new GsonBuilder()).create();
-            MoviePage mp = gson.fromJson(jsonString, MoviePage.class);
-            return mp;
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to fetch: ", e);
-        }
-        return null;
-    }
-
-    public byte[] getUrlBytes(String urlSpec) throws IOException {
+    private byte[] getUrlBytes(String urlSpec) throws IOException {
         URL url = new URL(urlSpec);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         try {
@@ -93,22 +63,64 @@ public class MoviedbFetcher {
         }
     }
 
-    public String getUrlString(String urlSpec) throws IOException {
-        return new String(getUrlBytes(urlSpec));
+    void fetchPage(MovieListType t, int pageNumber) {
+        String url =
+                Uri.parse("http://api.themoviedb.org/3/movie")
+                        .buildUpon()
+                        .appendPath(t.toString())
+                        .appendQueryParameter("page", pageNumber + "")
+                        .appendQueryParameter("api_key", mApiKey)
+                        .build().toString();
+        PageConsumer c;
+        if (t == MovieListType.POPULAR) {
+            c = new PageConsumer() {
+                @Override
+                public void accept(MoviePage mp) {
+                    mMovieDataCache.updatePopular(mp);
+                }
+            };
+        } else {
+            c = new PageConsumer() {
+                @Override
+                public void accept(MoviePage mp) {
+                    mMovieDataCache.updateTopRated(mp);
+                }
+            };
+        }
+        new DownloadPageTask().execute(new DownloadInfo(url, c));
     }
 
-    public enum MovieListType {
-        POPULAR("popular"),
-        TOP_RATED("top_rated");
-        private final String mString;
+    class DownloadInfo {
+        String url;
+        PageConsumer c;
+        DownloadInfo(String url, PageConsumer c) {
+            this.url = url;
+            this.c = c;
+        }
+    }
 
-        private MovieListType(String name) {
-            mString = name;
+    private class DownloadPageTask extends AsyncTask<DownloadInfo, Void, MoviePage> {
+        DownloadInfo mDownloadInfo;
+
+        @Override
+        protected MoviePage doInBackground(DownloadInfo... downloadInfos) {
+            mDownloadInfo = downloadInfos[0];
+            try {
+                String jsonString = getUrlString(mDownloadInfo.url);
+                Gson gson = (new GsonBuilder()).create();
+                MoviePage mp = gson.fromJson(jsonString, MoviePage.class);
+                return mp;
+            } catch (IOException e) {
+                Log.e(TAG, "Failed to fetch: ", e);
+            }
+            return null;
         }
 
         @Override
-        public String toString() {
-            return mString;
+        protected void onPostExecute(MoviePage moviePage) {
+                mDownloadInfo.c.accept(moviePage);
+
         }
     }
+
 }
