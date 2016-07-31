@@ -1,5 +1,7 @@
 package com.vaitls.movies;
 
+import android.content.Context;
+import android.net.Uri;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
@@ -13,7 +15,25 @@ import java.net.URL;
  */
 public class MoviedbFetcher {
     private final static String TAG=MoviedbFetcher.class.getSimpleName();
-
+    private String mApiKey;
+    MoviedbFetcher(String apiKey){
+        mApiKey=apiKey;
+    }
+    public void fetchItems() {
+        try{
+            String url= Uri.parse("http://api.themoviedb.org/3/movie")
+                    .buildUpon()
+                    .appendPath("top_rated")
+                    // .appendPath("popular")
+                    .appendQueryParameter("api_key",mApiKey)
+                    .build().toString();
+            Log.i(TAG, "URL: "+url);
+            String jsonString=getUrlString(url);
+            Log.i(TAG,"JSON: " +jsonString);
+        }catch (IOException e){
+            Log.e(TAG,"Failed to fetch: ", e);
+        }
+    }
     public byte []getUrlBytes(String urlSpec) throws IOException {
         URL url=new URL(urlSpec);
         HttpURLConnection connection=(HttpURLConnection) url.openConnection();

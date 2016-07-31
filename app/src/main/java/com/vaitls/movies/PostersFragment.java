@@ -41,18 +41,8 @@ public class PostersFragment extends Fragment{
     class FetchItemsTask extends AsyncTask<Void, Void, Void>{
         @Override
         protected Void doInBackground(Void... voids) {
-
-            try{
-                String key=getResources().getString(R.string.themoviedb_key);
-                String result=new MoviedbFetcher()
-                        .getUrlString("https://api.themoviedb.org/3/movie/550?api_key="+key);
- //             result=new MoviedbFetcher()
-//                        .getUrlString("http://vaitls.com");
-                Log.i(TAG,"Fetched: "+result);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            String key=getResources().getString(R.string.themoviedb_key);
+            new MoviedbFetcher(key).fetchItems();
             return null;
         }
     }
