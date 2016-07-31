@@ -1,5 +1,8 @@
 package com.vaitls.movies;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -25,6 +28,9 @@ public class PostersFragment extends Fragment{
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        if(!isOnline()){
+            // XXX Put up the sad face fragment and return.
+        }
         //return super.onCreateView(inflater, container, savedInstanceState);
         View v=inflater.inflate(R.layout.fragment_posters, container, false);
         mPostersRecylerView = (RecyclerView) v.findViewById(R.id.fragment_posters_recycler_view);
@@ -36,8 +42,18 @@ public class PostersFragment extends Fragment{
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+        String key=getResources().getString(R.string.themoviedb_key);
+        MoviedbFetcher.getInstance(key);
+
         new FetchItemsTask().execute();
     }
+    public boolean isOnline() {
+        ConnectivityManager cm =
+                (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
+
     class FetchItemsTask extends AsyncTask<Void, Void, Void>{
         @Override
         protected Void doInBackground(Void... voids) {
