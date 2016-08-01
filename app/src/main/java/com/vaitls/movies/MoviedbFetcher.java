@@ -1,7 +1,5 @@
 package com.vaitls.movies;
 
-import android.app.Activity;
-import android.app.Application;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
@@ -52,7 +50,7 @@ public class MoviedbFetcher {
                         urlSpec);
             }
             Log.d(TAG,"expires: "+connection.getExpiration());
-            int bytesRead = 0;
+            int bytesRead;
             byte[] buffer = new byte[1500];
             while ((bytesRead = in.read(buffer)) > 0) {
                 out.write(buffer, 0, bytesRead);

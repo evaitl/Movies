@@ -88,10 +88,10 @@ public class MovieDataCache {
     }
 
     void updatePopular(MoviePage mp) {
-        Log.d(TAG, "updating popular " + mp.getPage());
+       // Log.d(TAG, "updating popular " + mp.getPage());
         mFetching = false;
         if (mp == null) return;
-        assert mp.getPage() == mLastPopularPage + 1;
+        //assert mp.getPage() == mLastPopularPage + 1;
         mPopularTotalPages = mp.getTotal_pages();
         mLastPopularPage = mp.getPage();
         int oldEnd = mPopularList.size();
@@ -107,7 +107,7 @@ public class MovieDataCache {
         mFetching = false;
         if (mp == null) return;
 
-        assert mp.getPage() == mLastTopRatedPage + 1;
+        //assert mp.getPage() == mLastTopRatedPage + 1;
         mTopRatedTotalPages = mp.getTotal_pages();
         mLastTopRatedPage = mp.getPage();
         int oldEnd = mTopRatedList.size();
@@ -119,8 +119,7 @@ public class MovieDataCache {
     }
 
 /*
-TODO We should invalidate based on the http header "Expires" field, from
-     connection.getExpiration().
+TODO We should invalidate based on  connection.getExpiration().
 
     public void invalidate() {
         mPopularList.clear();

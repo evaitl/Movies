@@ -8,7 +8,7 @@ public enum MovieListType {
     TOP_RATED("top_rated");
 
     private String mName;
-    private MovieListType(String str){
+    MovieListType(String str){
         mName=str;
     }
 

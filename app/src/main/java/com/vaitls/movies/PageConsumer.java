@@ -7,5 +7,5 @@ package com.vaitls.movies;
  * do a cheapo local version.
  */
 public interface PageConsumer {
-    public void accept(MoviePage mp);
+    void accept(MoviePage mp);
 }

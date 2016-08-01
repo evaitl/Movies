@@ -3,7 +3,6 @@ package com.vaitls.movies;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -16,9 +15,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-
-import java.io.IOException;
 
 /**
  * Created by evaitl on 7/30/16.
@@ -59,25 +55,23 @@ public class PostersFragment extends Fragment{
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
- /*       if(!isOnline()){
-            // XXX Put up the sad face fragment and return.
-        }*/
-
-        //return super.onCreateView(inflater, container, savedInstanceState);
+        if(!isOnline()){
+            setRetainInstance(false);
+            setHasOptionsMenu(false);
+            return inflater.inflate(R.layout.no_network,container,false);
+        }
         Log.d(TAG,"onCreateView");
         View v=inflater.inflate(R.layout.fragment_posters, container, false);
         mPostersRecylerView = (RecyclerView) v.findViewById(R.id.fragment_posters_recycler_view);
         int columns= getResources().getInteger(R.integer.columns);
         mPostersRecylerView.setLayoutManager(new GridLayoutManager(getActivity(),columns));
-        //mPostersRecylerView.setHasFixedSize(true);
-
+        mPostersRecylerView.setHasFixedSize(true);
         setupAdapter();
         return v;
     }
     private void setupAdapter(){
         Log.d(TAG,"setupAdapter:"+isAdded());
         if(isAdded()){
-            MovieDataCache dbc=MovieDataCache.getInstance(getString(R.string.themoviedb_key));
             PhotoAdapter adapter= new PhotoAdapter(this,mSearchOrder);
             mPhotoAdapter = adapter;
             mPostersRecylerView.setAdapter(adapter);
@@ -90,14 +84,13 @@ public class PostersFragment extends Fragment{
         setRetainInstance(true);
         setHasOptionsMenu(true);
         mSearchOrder=MovieListType.POPULAR;
+        MovieDataCache.getInstance(getString(R.string.themoviedb_key));
         Log.d(TAG,"onCreate");
     }
-    public boolean isOnline() {
+    private boolean isOnline() {
         ConnectivityManager cm =
                 (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
-
-
 }

@@ -1,9 +1,11 @@
 <resources>
     <string name="app_name">Movies</string>
-    <string name="release_date">Release Date:</string>
-    <string name="title">Title:</string>
-    <string name="rating">Rating:</string>
-    <string name="synopis">Plot:</string>
+    <string name="release_date">Date:</string>
+    <string name="title_label">Title:</string>
+    <string name="rating_label">Rating:</string>
+    <string name="plot_label">Plot:</string>
     <string name="popularity_order">Popularity Order</string>
     <string name="ratings_order">Ratings Order</string>
+    <string name="no_network">No Available network</string>
+
 </resources>

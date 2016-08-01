@@ -2,7 +2,6 @@ package com.vaitls.movies;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -43,7 +42,7 @@ class PhotoHolder extends RecyclerView.ViewHolder implements View.OnClickListene
         this.idx=idx;
         String uri="http://image.tmdb.org/t/p/w185"+
                 mMovieInfo.getPoster_path();
-        Log.d(TAG,"getting movie: "+ uri.toString());
+        Log.d(TAG,"getting movie: "+ uri);
         Glide.with(mImageView.getContext())
                 .load(uri)
                 .placeholder(R.mipmap.ic_launcher)

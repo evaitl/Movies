@@ -8,27 +8,36 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_weight="1">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:layout_weight="1">
 
             <TextView
                 android:id="@+id/fragment_details_title_text_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="Super duper movie title"/>
+                tools:text="Super duper movie title"
+                android:paddingTop="@dimen/detail_padding_top"
+                android:textStyle="bold"
+                android:textSize="@dimen/detail_title_font_size"/>
 
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+
+                android:paddingTop="@dimen/detail_padding_top"
+                >
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/release_date"/>
+                    android:text="@string/release_date"
+                    android:paddingRight="@dimen/detail_label_pad"/>
 
                 <TextView
                     android:id="@+id/fragment_details_date_text_view"
@@ -39,11 +48,15 @@
 
             <LinearLayout
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:paddingTop="@dimen/detail_padding_top"
+
+                >
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/rating"/>
+                    android:text="@string/rating_label"
+                    android:paddingRight="@dimen/detail_label_pad"/>
                 <TextView
                     android:id="@+id/fragment_details_rating_text_view"
                     android:layout_width="wrap_content"
@@ -54,14 +67,23 @@
         </LinearLayout>
         <ImageView
             android:id="@+id/fragment_details_thubnail_image_view"
-            android:layout_width="120dp"
-            android:layout_height="180dp"
-            tools:src="@mipmap/ic_launcher"/>
+            tools:src="@mipmap/ic_launcher"
+            android:paddingLeft="@dimen/detail_image_padding"
+            android:layout_weight="1"
+            android:layout_width="@dimen/detail_image_width"
+            android:layout_height="@dimen/detail_image_height"/>
     </LinearLayout>
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left"
+        android:text="@string/plot_label"
+        />
+    <TextView
+        android:layout_weight="1.5"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/fragment_details_plot_text_view"
         tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam faucibus elit nectortor varius accumsan. Pellentesque scelerisque arcu at urna varius fermentum. Aenean auctor massa id neque mattis eleifend. Pellentesque posuere dui quam, eu maximus velit"
-        />
+        android:paddingTop="@dimen/detail_plot_pad_top"/>
 </LinearLayout>
