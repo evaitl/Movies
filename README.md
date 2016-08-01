@@ -9,8 +9,8 @@ Some notes:
 
 * The main activity will be a single fragment hosting a RecyclerView with a GridLayoutManager. 
 
-* I think I'd prefer to do the networking myself with an AsyncTask, but udacity is pushing
-picasso for fetching images for this project. I'll go that way as a path of least resistance. 
-
+* I went with glide instead of picasso for image loading. Picasso is causing sigabrt
+ when doing resizing on api24. api24 source hasn't been released yet, and glide didn't
+ have  that problem.
 
 

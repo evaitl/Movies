@@ -44,11 +44,9 @@ public class MovieDataCache {
         mTRAdapters = new LinkedList<>();
         mPAdapters = new LinkedList<>();
         mFetcher = MoviedbFetcher.getInstance(this, apiKey);
-        Log.d(TAG, "mdc c done");
     }
 
     public static MovieDataCache getInstance(String apiKey) {
-        Log.d(TAG, "gi: " + apiKey);
         if (sCache == null) {
             sCache = new MovieDataCache(apiKey);
             sCache.prefetch();

@@ -33,7 +33,7 @@ class  PhotoAdapter extends  RecyclerView.Adapter<PhotoHolder>{
     public void onBindViewHolder(PhotoHolder holder, int position) {
        Log.d(TAG,"obvh " +position);
        MovieInfo mi=mMovieDataCache.getPopular(position);
-       holder.bindMovieInfo(mMovieDataCache.getPopular(position));
+       holder.bindMovieInfo(position,mMovieDataCache.getPopular(position));
     }
 
     @Override
