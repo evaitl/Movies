@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+<LinearLayout
+
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical">
@@ -87,3 +92,4 @@
         tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam faucibus elit nectortor varius accumsan. Pellentesque scelerisque arcu at urna varius fermentum. Aenean auctor massa id neque mattis eleifend. Pellentesque posuere dui quam, eu maximus velit"
         android:paddingTop="@dimen/detail_plot_pad_top"/>
 </LinearLayout>
+</ScrollView>
