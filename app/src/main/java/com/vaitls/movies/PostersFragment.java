@@ -34,6 +34,7 @@ public class PostersFragment extends Fragment{
         }*/
 
         //return super.onCreateView(inflater, container, savedInstanceState);
+        Log.d(TAG,"onCreateView");
         View v=inflater.inflate(R.layout.fragment_posters, container, false);
         mPostersRecylerView = (RecyclerView) v.findViewById(R.id.fragment_posters_recycler_view);
         mPostersRecylerView.setLayoutManager(new GridLayoutManager(getActivity(),3));
@@ -42,17 +43,19 @@ public class PostersFragment extends Fragment{
         return v;
     }
     private void setupAdapter(){
+        Log.d(TAG,"setupAdapter:"+isAdded());
         if(isAdded()){
             MovieDataCache dbc=MovieDataCache.getInstance(getString(R.string.themoviedb_key));
             PhotoAdapter adapter= new PhotoAdapter(this,dbc);
             mPostersRecylerView.setAdapter(adapter);
         }
+        Log.d(TAG,"setupAdapter: done");
     }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-
+        Log.d(TAG,"onCreate");
     }
     public boolean isOnline() {
         ConnectivityManager cm =

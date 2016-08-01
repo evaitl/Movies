@@ -7,6 +7,7 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -36,20 +37,23 @@ public class MovieDataCache {
     private int mMaxTRFetched;
     private int mMaxPopFetched;
     private MoviedbFetcher mFetcher;
-    private Set<RecyclerView.Adapter> mTRAdapters;
-    private Set<RecyclerView.Adapter> mPAdapters;
+    private List<RecyclerView.Adapter> mTRAdapters;
+    private List<RecyclerView.Adapter> mPAdapters;
 
     private MovieDataCache(String apiKey) {
         assert apiKey != null;
         mPopularList = new ArrayList<>(100);
         mTopRatedList = new ArrayList<>(100);
-        mTRAdapters = new HashSet<>();
-        mPAdapters = new HashSet<>();
+        mTRAdapters = new LinkedList<>();
+        mPAdapters = new LinkedList<>();
         mFetcher = MoviedbFetcher.getInstance(this,apiKey);
+        Log.d(TAG,"mdc c done");
     }
     public static MovieDataCache getInstance(String apiKey) {
+        Log.d(TAG, "gi: "+apiKey);
         if (sCache == null) {
             sCache = new MovieDataCache(apiKey);
+            sCache.prefetch();
         }
         return sCache;
     }
@@ -67,13 +71,19 @@ public class MovieDataCache {
             mTRAdapters.remove(adapter);
         }
     }
+    static boolean mFetching;
     private void prefetch(){
-
+            Log.d(TAG,"prefetching");
+        if(mFetching){
+            return;
+        }
             if (mPopularList.size() - mMaxPopFetched < 10){
+                mFetching=true;
                 getNextPopularPage();
             }
 
             if(mTopRatedList.size()-mMaxTRFetched <10) {
+                mFetching=true;
                 getNextTopRatedPage();
             }
 
@@ -81,6 +91,8 @@ public class MovieDataCache {
 
 
     void updatePopular(MoviePage mp) {
+        Log.d(TAG,"updating popular "+mp.getPage());
+        mFetching=false;
         if (mp == null) return;
         assert mp.getPage() == mLastPopularPage + 1;
         mPopularTotalPages = mp.getTotal_pages();
@@ -88,12 +100,15 @@ public class MovieDataCache {
         int oldEnd = mPopularList.size();
         mPopularList.addAll(Arrays.asList(mp.getResults()));
         for(RecyclerView.Adapter adapter: mPAdapters) {
+            Log.d(TAG,"Notifying adapter "+ oldEnd+ " "+mp.getResults().length);
             adapter.notifyItemRangeInserted(oldEnd, mp.getResults().length);
         }
     }
 
     void updateTopRated(MoviePage mp) {
+        mFetching=false;
         if (mp == null) return;
+
         assert mp.getPage() == mLastTopRatedPage + 1;
         mTopRatedTotalPages = mp.getTotal_pages();
         mLastTopRatedPage = mp.getPage();
@@ -113,6 +128,7 @@ public class MovieDataCache {
     }
 
     private void getNextPopularPage() {
+        Log.d(TAG,"getNextPopularPage");
         if (mLastPopularPage >= mPopularTotalPages &&
                 mPopularTotalPages!=0) {
             return;
@@ -128,6 +144,7 @@ public class MovieDataCache {
         mFetcher.fetchPage(MovieListType.TOP_RATED, mLastTopRatedPage + 1);
     }
     public  MovieInfo getPopular(int idx) {
+        Log.d(TAG, "getPopular "+idx);
         if (idx > mMaxPopFetched) {
             mMaxPopFetched = idx;
             prefetch();
