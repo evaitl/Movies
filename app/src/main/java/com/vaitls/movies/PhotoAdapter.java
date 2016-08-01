@@ -15,14 +15,27 @@ class  PhotoAdapter extends  RecyclerView.Adapter<PhotoHolder>{
     private static final String TAG=PhotoAdapter.class.getSimpleName();
     private MovieDataCache mMovieDataCache;
     private PostersFragment mPostersFragment;
-
+    private MovieListType mSearchOrder;
     public PhotoAdapter(PostersFragment postersFragment,
-                        MovieDataCache movieDataCache){
-        mMovieDataCache=movieDataCache;
+                        MovieListType searchOrder){
+        mSearchOrder=searchOrder;
+        mMovieDataCache=MovieDataCache.getInstance(null);
         mPostersFragment=postersFragment;
-        assert movieDataCache!=null;
+
         Log.d(TAG,"constr");
     }
+
+    void setSearchOrder(MovieListType searchOrder){
+        if(searchOrder==mSearchOrder){
+            return;
+        }
+
+        mMovieDataCache.removeAdapter(mSearchOrder,this);
+        mMovieDataCache.addAdapter(searchOrder,this);
+        mSearchOrder=searchOrder;
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemCount() {
       //  Log.d(TAG,"gic "+ mMovieDataCache.getPopularTotal());
@@ -32,8 +45,7 @@ class  PhotoAdapter extends  RecyclerView.Adapter<PhotoHolder>{
    @Override
     public void onBindViewHolder(PhotoHolder holder, int position) {
        Log.d(TAG,"obvh " +position);
-       MovieInfo mi=mMovieDataCache.getPopular(position);
-       holder.bindMovieInfo(position,mMovieDataCache.getPopular(position));
+       holder.bindMovieInfo(mSearchOrder, position);
     }
 
     @Override
@@ -47,14 +59,14 @@ class  PhotoAdapter extends  RecyclerView.Adapter<PhotoHolder>{
     @Override
     public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
-        mMovieDataCache.addAdapter(MovieListType.POPULAR,this);
+        mMovieDataCache.addAdapter(mSearchOrder,this);
         Log.d(TAG,"oatrv");
     }
 
     @Override
     public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);
-        mMovieDataCache.removeAdapter(MovieListType.POPULAR,this);
+        mMovieDataCache.removeAdapter(mSearchOrder,this);
         Log.d(TAG,"odfrv");
     }
 }

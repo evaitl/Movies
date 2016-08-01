@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name">Movies</string>
     <string name="release_date">Release Date:</string>
-    <string name="title">Title: </string>
-    <string name="rating">Rating: </string>
-    <string name="synopis">Plot: </string>
+    <string name="title">Title:</string>
+    <string name="rating">Rating:</string>
+    <string name="synopis">Plot:</string>
+    <string name="popularity_order">Popularity Order</string>
+    <string name="ratings_order">Ratings Order</string>
 </resources>

@@ -149,6 +149,19 @@ TODO We should invalidate based on the http header "Expires" field, from
         mFetcher.fetchPage(MovieListType.TOP_RATED, mLastTopRatedPage + 1);
     }
 
+    public MovieInfo get(MovieListType movieListType, int idx){
+        if(movieListType==MovieListType.POPULAR){
+            return getPopular(idx);
+        }
+        return getTopRated(idx);
+    }
+    public int getTotal(MovieListType movieListType){
+        if(movieListType==MovieListType.POPULAR){
+            return getPopularTotal();
+        }
+        return getTopRatedTotal();
+    }
+
     public MovieInfo getPopular(int idx) {
         Log.d(TAG, "getPopular " + idx);
         if (idx > mMaxPopFetched) {

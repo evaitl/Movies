@@ -18,26 +18,31 @@ import com.bumptech.glide.Glide;
 class PhotoHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
     private static final String TAG=PhotoHolder.class.getSimpleName();
     private ImageView mImageView;
+    private MovieListType mSearchOrder;
     private MovieInfo mMovieInfo;
+    private MovieDataCache mdc;
     private int idx;
     public PhotoHolder(View itemView) {
         super(itemView);
         itemView.setOnClickListener(this);
         mImageView = (ImageView) itemView;
+        mdc=MovieDataCache.getInstance(null);
     }
 
     @Override
     public void onClick(View view) {
         Context context=mImageView.getContext();
-        Intent intent = DetailsPagerActivity.newIntent(context,idx );
+        Log.d(TAG,"oc "+mSearchOrder+" "+idx);
+        Intent intent = DetailsPagerActivity.newIntent(context, mSearchOrder, idx);
         context.startActivity(intent);
     }
 
-    public void bindMovieInfo(int idx, MovieInfo mi) {
-        mMovieInfo = mi;
+    public void bindMovieInfo(MovieListType searchOrder, int idx) {
+        mSearchOrder = searchOrder;
+        mMovieInfo = mdc.get(searchOrder,idx);
         this.idx=idx;
         String uri="http://image.tmdb.org/t/p/w185"+
-                mi.getPoster_path();
+                mMovieInfo.getPoster_path();
         Log.d(TAG,"getting movie: "+ uri.toString());
         Glide.with(mImageView.getContext())
                 .load(uri)

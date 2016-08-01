@@ -3,6 +3,7 @@ package com.vaitls.movies;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,11 +17,14 @@ import com.bumptech.glide.Glide;
  * Created by evaitl on 8/1/16.
  */
 public class DetailsFragment extends Fragment{
+    private static final String TAG=DetailsFragment.class.getSimpleName();
     private static final String ARG_IDX="ARG_IDX";
+    private static final String ARG_SO="ARG_SO";
     private MovieInfo mMovieInfo;
-    public static DetailsFragment newInstance(int idx){
+    public static DetailsFragment newInstance(MovieListType searchOrder,int idx){
         Bundle args = new Bundle();
         args.putInt(ARG_IDX,idx);
+        args.putSerializable(ARG_SO,searchOrder);
         DetailsFragment fragment=new DetailsFragment();
         fragment.setArguments(args);
         return fragment;
@@ -60,6 +64,8 @@ public class DetailsFragment extends Fragment{
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         int idx=getArguments().getInt(ARG_IDX);
-        mMovieInfo=MovieDataCache.getInstance(null).getPopular(idx);
+        MovieListType searchOrder=(MovieListType) getArguments().getSerializable(ARG_SO);
+        Log.d(TAG,"df:oC "+searchOrder+" "+idx);
+        mMovieInfo=MovieDataCache.getInstance(null).get(searchOrder,idx);
     }
 }

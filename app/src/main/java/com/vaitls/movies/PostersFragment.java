@@ -11,6 +11,9 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -22,9 +25,36 @@ import java.io.IOException;
  */
 public class PostersFragment extends Fragment{
     private static final String TAG=PostersFragment.class.getSimpleName();
+    private PhotoAdapter mPhotoAdapter;
+    private MovieListType mSearchOrder;
     private RecyclerView mPostersRecylerView;
     public static PostersFragment newInstance() {
         return new PostersFragment();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_posters,menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()){
+            case R.id.menu_item_popularity_order:
+                mSearchOrder=MovieListType.POPULAR;
+                Log.d(TAG,"mipo: "+mSearchOrder);
+                mPhotoAdapter.setSearchOrder(mSearchOrder);
+                return true;
+
+            case R.id.menu_item_ratings_order:
+                mSearchOrder=MovieListType.TOP_RATED;
+                Log.d(TAG,"miro: "+mSearchOrder);
+                mPhotoAdapter.setSearchOrder(mSearchOrder);
+                return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -48,7 +78,8 @@ public class PostersFragment extends Fragment{
         Log.d(TAG,"setupAdapter:"+isAdded());
         if(isAdded()){
             MovieDataCache dbc=MovieDataCache.getInstance(getString(R.string.themoviedb_key));
-            PhotoAdapter adapter= new PhotoAdapter(this,dbc);
+            PhotoAdapter adapter= new PhotoAdapter(this,mSearchOrder);
+            mPhotoAdapter = adapter;
             mPostersRecylerView.setAdapter(adapter);
         }
         Log.d(TAG,"setupAdapter: done");
@@ -57,6 +88,8 @@ public class PostersFragment extends Fragment{
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+        setHasOptionsMenu(true);
+        mSearchOrder=MovieListType.POPULAR;
         Log.d(TAG,"onCreate");
     }
     public boolean isOnline() {
