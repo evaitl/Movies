@@ -27,11 +27,13 @@ class  PhotoAdapter extends  RecyclerView.Adapter<PhotoHolder>{
         if(searchOrder==mSearchOrder){
             return;
         }
-
+        notifyItemRangeRemoved(0,mMovieDataCache.getTotal(mSearchOrder));
         mMovieDataCache.removeAdapter(mSearchOrder,this);
         mMovieDataCache.addAdapter(searchOrder,this);
         mSearchOrder=searchOrder;
-        notifyDataSetChanged();
+        // notifyDataSetChanged(); null pointer error in holder
+        // Change to all removed.
+
     }
 
     @Override

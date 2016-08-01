@@ -155,6 +155,7 @@ TODO We should invalidate based on  connection.getExpiration().
         return getTopRated(idx);
     }
     public int getTotal(MovieListType movieListType){
+        Log.d(TAG,"gt " + movieListType + " " +getPopularTotal() + " "+ getTopRatedTotal());
         if(movieListType==MovieListType.POPULAR){
             return getPopularTotal();
         }
@@ -167,6 +168,12 @@ TODO We should invalidate based on  connection.getExpiration().
             mMaxPopFetched = idx;
             prefetch();
         }
+        // TODO better fix for this.
+        if(idx>=mPopularList.size()){
+            Log.e(TAG, "Attempted index OOB P");
+            idx=mPopularList.size()-1;
+        }
+
         return mPopularList.get(idx);
     }
 
@@ -182,6 +189,11 @@ TODO We should invalidate based on  connection.getExpiration().
         if (idx > mMaxTRFetched) {
             mMaxTRFetched = idx;
             prefetch();
+        }
+        // TODO better fix for this.
+        if(idx>=mTopRatedList.size()){
+            Log.e(TAG, "Attempted index OOB TR");
+            idx=mTopRatedList.size()-1;
         }
         return mTopRatedList.get(idx);
     }
