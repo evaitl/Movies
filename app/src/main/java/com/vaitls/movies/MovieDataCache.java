@@ -11,7 +11,8 @@ import java.util.List;
 /**
  * Created by evaitl on 7/30/16.
  * <p/>
- * Central data store for movie data. Singleton using a factory method, getInstance. The
+ * MovieDataCache is the central data store for movie data. It is a singleton using a factory
+ * method, getInstance(). The
  * MovieDataCache acts as an intermediary between a RecycleView.Adapter and
  * a MoviedbFetcher.
  * <p/>
@@ -101,6 +102,7 @@ public class MovieDataCache {
             Log.d(TAG, "Notifying adapter " + oldEnd + " " + mp.getResults().length);
             adapter.notifyItemRangeInserted(oldEnd, mp.getResults().length);
         }
+        prefetch();
     }
 
     void updateTopRated(MoviePage mp) {
@@ -115,7 +117,12 @@ public class MovieDataCache {
         for (RecyclerView.Adapter adapter : mTRAdapters) {
             adapter.notifyItemRangeInserted(oldEnd, mp.getResults().length);
         }
+        prefetch();
     }
+
+/*
+TODO We should invalidate based on the http header "Expires" field, from
+     connection.getExpiration().
 
     public void invalidate() {
         mPopularList.clear();
@@ -123,7 +130,9 @@ public class MovieDataCache {
         mTopRatedTotalPages = mLastTopRatedPage = 0;
         mPopularTotalPages = mLastPopularPage = 0;
         mMaxPopFetched = mMaxTRFetched = 0;
+        prefetch();
     }
+*/
 
     private void getNextPopularPage() {
         Log.d(TAG, "getNextPopularPage");

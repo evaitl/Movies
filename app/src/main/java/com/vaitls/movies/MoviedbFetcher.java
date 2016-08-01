@@ -51,6 +51,7 @@ public class MoviedbFetcher {
                 throw new IOException(connection.getResponseMessage() + ": with " +
                         urlSpec);
             }
+            Log.d(TAG,"expires: "+connection.getExpiration());
             int bytesRead = 0;
             byte[] buffer = new byte[1500];
             while ((bytesRead = in.read(buffer)) > 0) {
