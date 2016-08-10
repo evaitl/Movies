@@ -25,7 +25,7 @@ class PhotoHolder extends RecyclerView.ViewHolder implements View.OnClickListene
         super(itemView);
         itemView.setOnClickListener(this);
         mImageView = (ImageView) itemView;
-        mdc=MovieDataCache.getInstance(null);
+        mdc=MovieDataCache.getInstance();
     }
 
     @Override

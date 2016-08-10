@@ -17,7 +17,7 @@ class  PhotoAdapter extends  RecyclerView.Adapter<PhotoHolder>{
     public PhotoAdapter(PostersFragment postersFragment,
                         MovieListType searchOrder){
         mSearchOrder=searchOrder;
-        mMovieDataCache=MovieDataCache.getInstance(null);
+        mMovieDataCache=MovieDataCache.getInstance();
         mPostersFragment=postersFragment;
 
         Log.d(TAG,"constr");

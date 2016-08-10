@@ -65,6 +65,6 @@ public class DetailsFragment extends Fragment{
         int idx=getArguments().getInt(ARG_IDX);
         MovieListType searchOrder=(MovieListType) getArguments().getSerializable(ARG_SO);
         Log.d(TAG,"df:oC "+searchOrder+" "+idx);
-        mMovieInfo=MovieDataCache.getInstance(null).get(searchOrder,idx);
+        mMovieInfo=MovieDataCache.getInstance().get(searchOrder,idx);
     }
 }

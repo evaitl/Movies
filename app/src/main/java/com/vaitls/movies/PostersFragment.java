@@ -84,7 +84,8 @@ public class PostersFragment extends Fragment{
         setRetainInstance(true);
         setHasOptionsMenu(true);
         mSearchOrder=MovieListType.POPULAR;
-        MovieDataCache.getInstance(getString(R.string.themoviedb_key));
+        MovieDataCache.setKey(getString(R.string.themoviedb_key));
+
         Log.d(TAG,"onCreate");
     }
     private boolean isOnline() {

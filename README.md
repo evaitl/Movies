@@ -14,3 +14,8 @@ Some notes:
  have  that problem.
 
 
+TODO:
+
+* Move to 23
+* Replace MoviedbFetcher with retrofit
+* Add a sql database caching with a db cursor.

@@ -28,7 +28,7 @@ public class DetailsPagerActivity extends AppCompatActivity {
         final MovieListType searchOrder=(MovieListType)getIntent().getSerializableExtra(EXTRA_SO);
         Log.d(TAG,"dpa:oc:"+searchOrder+" "+idx);
         mViewPager=(ViewPager)findViewById(R.id.activity_details_view_pager);
-        mDC=MovieDataCache.getInstance(getString(R.string.themoviedb_key));
+        mDC=MovieDataCache.getInstance();
         FragmentManager fragmentManager=getSupportFragmentManager();
         mViewPager.setAdapter(new FragmentPagerAdapter(fragmentManager) {
             @Override

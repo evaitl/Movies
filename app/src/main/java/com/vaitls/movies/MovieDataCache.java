@@ -8,6 +8,15 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
+import retrofit2.http.Query;
+
 /**
  * Created by evaitl on 7/30/16.
  * <p/>
@@ -33,22 +42,57 @@ public class MovieDataCache {
     private int mLastTopRatedPage;
     private int mMaxTRFetched;
     private int mMaxPopFetched;
-    private MoviedbFetcher mFetcher;
     private List<RecyclerView.Adapter> mTRAdapters;
     private List<RecyclerView.Adapter> mPAdapters;
+    private static String sApiKey;
 
-    private MovieDataCache(String apiKey) {
-        assert apiKey != null;
+    private class CB implements Callback<MoviePage> {
+        MovieListType mMovieListType;
+        CB(MovieListType movieListType){
+            mMovieListType=movieListType;
+        }
+        @Override
+        public void onFailure(Call<MoviePage> call, Throwable t) {
+            Log.e(TAG,"Movieapi failure: ", t);
+        }
+        @Override
+        public void onResponse(Call<MoviePage> call, Response<MoviePage> response) {
+            update(mMovieListType,response.body());
+        }
+    }
+
+    private interface MovieApi {
+        @GET("{type}")
+        Call<MoviePage> getPage( @Path("type") String type, @Query("api_key") String apiKey, @Query("page") int page);
+        static final Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://api.themoviedb.org/3/movie/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+    }
+
+    static void setKey(String apiKey){
+        sApiKey=apiKey;
+    }
+
+    private void fetchPage(MovieListType type, int page){
+        CB cb=new CB(type);
+        MovieApi.retrofit.create(MovieApi.class)
+                .getPage(type.toString(),sApiKey,page)
+                .enqueue(cb);
+    }
+    private MovieDataCache() {
+        if(sApiKey==null) {
+            throw new RuntimeException("API key not set");
+        }
         mPopularList = new ArrayList<>(100);
         mTopRatedList = new ArrayList<>(100);
         mTRAdapters = new LinkedList<>();
         mPAdapters = new LinkedList<>();
-        mFetcher = MoviedbFetcher.getInstance(this, apiKey);
     }
 
-    public static MovieDataCache getInstance(String apiKey) {
+    public static MovieDataCache getInstance() {
         if (sCache == null) {
-            sCache = new MovieDataCache(apiKey);
+            sCache = new MovieDataCache();
             sCache.prefetch();
         }
         return sCache;
@@ -86,11 +130,18 @@ public class MovieDataCache {
         }
 
     }
-
-    void updatePopular(MoviePage mp) {
-       // Log.d(TAG, "updating popular " + mp.getPage());
+    private void update(MovieListType type, MoviePage mp){
         mFetching = false;
         if (mp == null) return;
+        if(type==MovieListType.POPULAR){
+            updatePopular(mp);
+        }else{
+            updateTopRated(mp);
+        }
+    }
+    private void updatePopular(MoviePage mp) {
+       // Log.d(TAG, "updating popular " + mp.getPage());
+
         //assert mp.getPage() == mLastPopularPage + 1;
         mPopularTotalPages = mp.getTotal_pages();
         mLastPopularPage = mp.getPage();
@@ -103,10 +154,7 @@ public class MovieDataCache {
         prefetch();
     }
 
-    void updateTopRated(MoviePage mp) {
-        mFetching = false;
-        if (mp == null) return;
-
+    private void updateTopRated(MoviePage mp) {
         //assert mp.getPage() == mLastTopRatedPage + 1;
         mTopRatedTotalPages = mp.getTotal_pages();
         mLastTopRatedPage = mp.getPage();
@@ -137,7 +185,7 @@ TODO We should invalidate based on  connection.getExpiration().
                 mPopularTotalPages != 0) {
             return;
         }
-        mFetcher.fetchPage(MovieListType.POPULAR, mLastPopularPage + 1);
+        fetchPage(MovieListType.POPULAR, mLastPopularPage + 1);
     }
 
     private void getNextTopRatedPage() {
@@ -145,7 +193,7 @@ TODO We should invalidate based on  connection.getExpiration().
                 mTopRatedTotalPages != 0) {
             return;
         }
-        mFetcher.fetchPage(MovieListType.TOP_RATED, mLastTopRatedPage + 1);
+        fetchPage(MovieListType.TOP_RATED, mLastTopRatedPage + 1);
     }
 
     public MovieInfo get(MovieListType movieListType, int idx){
