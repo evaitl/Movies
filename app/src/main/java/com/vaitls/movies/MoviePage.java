@@ -5,7 +5,7 @@ package com.vaitls.movies;
  *
  * The fields are created to match the json information in a themoviedb api call.
  */
-public class MoviePage {
+class MoviePage {
     private int page;
     private MovieInfo[] results;
     private int total_results;

@@ -11,8 +11,8 @@ import android.view.ViewGroup;
  */
 class  PhotoAdapter extends  RecyclerView.Adapter<PhotoHolder>{
     private static final String TAG=PhotoAdapter.class.getSimpleName();
-    private MovieDataCache mMovieDataCache;
-    private PostersFragment mPostersFragment;
+    private final MovieDataCache mMovieDataCache;
+    private final PostersFragment mPostersFragment;
     private MovieListType mSearchOrder;
     public PhotoAdapter(PostersFragment postersFragment,
                         MovieListType searchOrder){
@@ -31,15 +31,11 @@ class  PhotoAdapter extends  RecyclerView.Adapter<PhotoHolder>{
         mMovieDataCache.removeAdapter(mSearchOrder,this);
         mMovieDataCache.addAdapter(searchOrder,this);
         mSearchOrder=searchOrder;
-        // notifyDataSetChanged(); null pointer error in holder
-        // Change to all removed.
-
     }
 
     @Override
     public int getItemCount() {
-      //  Log.d(TAG,"gic "+ mMovieDataCache.getPopularTotal());
-        return mMovieDataCache.getPopularTotal();
+        return mMovieDataCache.getTotal(mSearchOrder);
     }
 
    @Override

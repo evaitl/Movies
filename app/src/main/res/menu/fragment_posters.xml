@@ -4,10 +4,11 @@
     <item android:id="@+id/menu_item_popularity_order"
           android:title="@string/popularity_order"
           app:showAsAction="never"/>
-
     <item android:id="@+id/menu_item_ratings_order"
           android:title="@string/ratings_order"
           app:showAsAction="never"/>
-
+    <item android:id="@+id/menu_item_favorites"
+          android:title="@string/favorites"
+          app:showAsAction="never"/>
 
 </menu>

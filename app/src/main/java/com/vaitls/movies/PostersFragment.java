@@ -48,6 +48,11 @@ public class PostersFragment extends Fragment{
                 Log.d(TAG,"miro: "+mSearchOrder);
                 mPhotoAdapter.setSearchOrder(mSearchOrder);
                 return true;
+            case R.id.menu_item_favorites:
+                mSearchOrder=MovieListType.FAVORITE;
+                Log.d(TAG,"mirf:");
+                mPhotoAdapter.setSearchOrder(mSearchOrder);
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -84,7 +89,7 @@ public class PostersFragment extends Fragment{
         setRetainInstance(true);
         setHasOptionsMenu(true);
         mSearchOrder=MovieListType.POPULAR;
-        MovieDataCache.setKey(getString(R.string.themoviedb_key));
+
 
         Log.d(TAG,"onCreate");
     }

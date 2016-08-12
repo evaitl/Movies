@@ -16,10 +16,10 @@ import com.bumptech.glide.Glide;
 
 class PhotoHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
     private static final String TAG=PhotoHolder.class.getSimpleName();
-    private ImageView mImageView;
+    private final ImageView mImageView;
     private MovieListType mSearchOrder;
     private MovieInfo mMovieInfo;
-    private MovieDataCache mdc;
+    private final MovieDataCache mdc;
     private int idx;
     public PhotoHolder(View itemView) {
         super(itemView);

@@ -2,13 +2,15 @@ package com.vaitls.movies;
 
 /**
  * Created by evaitl on 7/30/16.
+ * <p/>
+ * The fields are created to match the json information in a themoviedb api calls.
  *
- * The fields are created to match the json information in a themoviedb api call.
+ * Not all fields are returned with every call, so some will have default values.
  */
-public class MovieInfo {
+class MovieInfo {
     private boolean adult;
     private String backdrop_path;
-    private int []genre_ids;
+    private int[] genre_ids;
     private int id;
     private String original_language;
     private String original_title;
@@ -21,10 +23,56 @@ public class MovieInfo {
     private float vote_average;
     private int vote_count;
 
+
+    private String imdb_id;
+    private ProductionCompanies[] production_companies;
+
+    private ProductionCountries[] production_countries;
+    private long revenue;
+    private int runtime;
+    private SpokenLanguages[] spoken_languages;
+    private String status;
+    private String tagline;
+
+
     /**
      * Private constructor: Only create these with gson.
      */
-    private MovieInfo() {}
+    private MovieInfo() {
+    }
+
+    public String getImdb_id() {
+        return imdb_id;
+    }
+
+    public ProductionCompanies[] getProduction_companies() {
+        return production_companies;
+    }
+
+    public ProductionCountries[] getProduction_countries() {
+        return production_countries;
+    }
+
+    public long getRevenue() {
+        return revenue;
+    }
+
+    public int getRuntime() {
+        return runtime;
+    }
+
+    public SpokenLanguages[] getSpoken_languages() {
+        return spoken_languages;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public String getTagline() {
+        return tagline;
+    }
+
     // Generated getters.
     public boolean isAdult() {
         return adult;
@@ -80,6 +128,21 @@ public class MovieInfo {
 
     public int getVote_count() {
         return vote_count;
+    }
+
+    class ProductionCompanies {
+        String name;
+        int id;
+    }
+
+    class ProductionCountries {
+        String iso_3166_1;
+        String name;
+    }
+
+    class SpokenLanguages {
+        String iso_639_1;
+        String name;
     }
 }
 
