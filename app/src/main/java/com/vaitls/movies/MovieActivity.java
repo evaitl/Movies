@@ -1,51 +1,131 @@
 package com.vaitls.movies;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-public class MovieActivity extends SingleFragmentActivity {
-    private static final String FAVORITES_FILE_NAME="movies_favorites.objs";
-    private static final String TAG=MovieActivity.class.getSimpleName();
-    @Override
-    protected Fragment createFragment() {
-        Log.d(TAG,"Creating posters fragment");
-        return PostersFragment.newInstance();
+public class MovieActivity extends AppCompatActivity {
+    private static final String FAVORITES_FILE_NAME = "movies_favorites.objs";
+    private static final String TAG = MovieActivity.class.getSimpleName();
+    private PostersFragment mPostersFragment;
+    private DetailsFragment mDetailsFragment;
+
+    private void saveFavorites() {
+        try (ObjectOutputStream oos =
+                     new ObjectOutputStream(openFileOutput(FAVORITES_FILE_NAME,
+                             Context.MODE_PRIVATE))) {
+            oos.writeObject(MovieDataCache.getInstance().getFavorites());
+        } catch (Exception e) {
+            Log.e(TAG, "wtf: ", e);
+        }
     }
 
+    void listItemSelected(MovieListType searchOrder, int idx){
+        if(mDetailsFragment==null){
+            Intent intent=DetailsActivity.newIntent(getApplicationContext(), searchOrder,idx);
+            startActivity(intent);
+        }else {
+            mDetailsFragment.setIndex(idx);
+        }
+    }
+
+    private void loadFavorites() {
+        MovieDataCache.setKey(getString(R.string.themoviedb_key));
+        try (ObjectInputStream ois =
+                     new ObjectInputStream(openFileInput(FAVORITES_FILE_NAME))) {
+            MovieDataCache.getInstance().addFavorites((int[]) ois.readObject());
+        } catch (IOException e) {
+            // Don't care
+        } catch (ClassNotFoundException e) {
+            Log.e(TAG, "wtf: ", e);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.fragment_posters, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        MovieListType searchOrder = null;
+        switch (item.getItemId()) {
+            case R.id.menu_item_favorites:
+                searchOrder = MovieListType.FAVORITE;
+                break;
+            case R.id.menu_item_popularity_order:
+                searchOrder = MovieListType.POPULAR;
+                break;
+            case R.id.menu_item_ratings_order:
+                searchOrder = MovieListType.TOP_RATED;
+                break;
+        }
+        if (searchOrder != null) {
+            if (mPostersFragment != null) {
+                mPostersFragment.setSearchOrder(searchOrder);
+            }
+            if (mDetailsFragment != null) {
+                mDetailsFragment.setSearchOrder(searchOrder);
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_fragment);
-        MovieDataCache.setKey(getString(R.string.themoviedb_key));
-        try(ObjectInputStream ois=
-                    new ObjectInputStream(openFileInput(FAVORITES_FILE_NAME))) {
-            MovieDataCache.getInstance().addFavorites((int[])ois.readObject());
-        }catch (IOException e){
-            // Don't care
-        }catch (ClassNotFoundException e){
-            Log.e(TAG, "wtf: ", e);
+        loadFavorites();
+        // main is a resource value based on screen size. It points at
+        // either single or two fragment layout.
+        setContentView(R.layout.main);
+        FragmentManager fm = getSupportFragmentManager();
+        Log.d(TAG,"main "+R.layout.main+" asf "+R.layout.activity_single_fragment+ " atf "+R.layout.activity_two_fragment);
+        Log.d(TAG, "fc: "+findViewById(R.id.fragment_container));
+        Log.d(TAG, "lfc: "+findViewById(R.id.left_fragment_container));
+        if (findViewById(R.id.fragment_container)!=null) { // single fragment
+            Log.d(TAG,"one frag");
+            mPostersFragment = (PostersFragment) fm.findFragmentById(R.id.fragment_container);
+            if (mPostersFragment == null) {
+                mPostersFragment = PostersFragment.newInstance();
+                fm.beginTransaction()
+                        .add(R.id.fragment_container, mPostersFragment)
+                        .commit();
+            }
+        } else {
+            Log.d(TAG,"two frags");
+            mPostersFragment = (PostersFragment) fm.findFragmentById(R.id.left_fragment_container);
+            mDetailsFragment = (DetailsFragment) fm.findFragmentById(R.id.right_fragment_container);
+            if (mPostersFragment == null) {
+                mPostersFragment = PostersFragment.newInstance();
+                fm.beginTransaction()
+                        .add(R.id.left_fragment_container, mPostersFragment)
+                        .commit();
+            }
+            if (mDetailsFragment == null) {
+                mDetailsFragment = DetailsFragment.newInstance(MovieListType.POPULAR, 0);
+                fm.beginTransaction()
+                        .add(R.id.right_fragment_container, mDetailsFragment)
+                        .commit();
+            }
         }
-
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        try(ObjectOutputStream oos=
-                    new ObjectOutputStream(openFileOutput(FAVORITES_FILE_NAME,
-                                Context.MODE_PRIVATE))){
-            oos.writeObject(MovieDataCache.getInstance().getFavorites());
-        }catch(Exception e){
-            Log.e(TAG,"wtf: ",e);
-        }
+        saveFavorites();
     }
 }
