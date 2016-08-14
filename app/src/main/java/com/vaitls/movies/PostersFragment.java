@@ -81,8 +81,6 @@ public class PostersFragment extends Fragment {
         setRetainInstance(true);
         setHasOptionsMenu(true);
         mSearchOrder = MovieListType.POPULAR;
-
-
         Log.d(TAG, "onCreate");
     }
 

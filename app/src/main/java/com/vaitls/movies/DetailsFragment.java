@@ -29,11 +29,16 @@ public class DetailsFragment extends Fragment {
     private MovieListType mSearchOrder;
     private DetailsAdapter mDetailsAdapter;
     private int mIndex;
-    private SnappingRecyclerView mRecyclerView;
+    private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
+
 
     public static DetailsFragment newInstance(MovieListType searchOrder, int idx) {
         DetailsFragment fragment = new DetailsFragment();
+        Bundle bundle = new Bundle();
+        bundle.putInt(ARG_IDX, idx);
+        bundle.putSerializable(ARG_SO, searchOrder);
+        fragment.setArguments(bundle);
         return fragment;
     }
 
@@ -51,25 +56,34 @@ public class DetailsFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
         mDC = MovieDataCache.getInstance();
         View v = inflater.inflate(R.layout.snapping_recycler_view, container, false);
-        mRecyclerView = (SnappingRecyclerView) v.findViewById(R.id.snapping_recycler);
+        mRecyclerView = (RecyclerView) v.findViewById(R.id.snapping_recycler);
         mLayoutManager = new LinearLayoutManager(getActivity(),
                 LinearLayoutManager.HORIZONTAL, false);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(new DetailsAdapter(mSearchOrder));
+       // mRecyclerView.setSnapEnabled(true);
         return v;
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+        Bundle bundle=getArguments();
+        mSearchOrder=(MovieListType)bundle.getSerializable(ARG_SO);
+        if(mSearchOrder==null){
+            Log.d(TAG,"Default search order");
+            mSearchOrder=MovieListType.POPULAR;
+        }
+        mIndex=bundle.getInt(ARG_IDX,0);
         Log.d(TAG,"df onCreate");
-
     }
 
     class DetailsAdapter extends RecyclerView.Adapter<DetailsHolder> {
         MovieListType mSearchOrder;
 
         DetailsAdapter(MovieListType searchOrder) {
+            Log.d(TAG,"new da "+ searchOrder);
             mSearchOrder = searchOrder;
         }
 
@@ -81,9 +95,9 @@ public class DetailsFragment extends Fragment {
         @Override
         public DetailsHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             Context context = parent.getContext();
-            LayoutInflater inflater = LayoutInflater.from(context);
-
-            return null;
+            View v = LayoutInflater.from(context)
+                    .inflate(R.layout.details_scroll_view,parent,false);
+            return new DetailsHolder(v);
         }
 
         void setSearchOrder(MovieListType searchOrder) {
@@ -98,7 +112,7 @@ public class DetailsFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(DetailsHolder h, int position) {
-            Log.d(TAG,"bindViewHolder " + position)
+            Log.d(TAG,"on bindViewHolder " + position);
             MovieInfo mi=mDC.get(mSearchOrder,position);
             h.getTitleTextView().setText(mi.getTitle());
             h.getRatingTextView().setText(String.format("%.2f",mi.getVote_average()));

@@ -253,7 +253,7 @@ final public class MovieDataCache {
     }
 
     private void prefetch() {
-        Log.d(TAG, "prefetching");
+     //   Log.d(TAG, "prefetching");
         if (mPopularList.size() - mMaxPopFetched < 20) {
             getNextPopularPage();
         }
@@ -347,7 +347,6 @@ final public class MovieDataCache {
     }
 
     private void getNextPopularPage() {
-        Log.d(TAG, "getNextPopularPage");
         if (mLastPopularPage >= mPopularTotalPages &&
                 mPopularTotalPages != 0) {
             return;
