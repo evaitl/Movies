@@ -55,7 +55,7 @@ public class PostersFragment extends Fragment {
         }
         Log.d(TAG, "onCreateView");
         View v = inflater.inflate(R.layout.recycler_view, container, false);
-        mPostersRecylerView = (RecyclerView) v.findViewById(R.id.fragment_posters_recycler_view);
+        mPostersRecylerView = (RecyclerView) v.findViewById(R.id.full_page_recycler_view);
         int columns = getResources().getInteger(R.integer.columns);
         mPostersRecylerView.setLayoutManager(new GridLayoutManager(getActivity(), columns));
         mPostersRecylerView.setHasFixedSize(true);

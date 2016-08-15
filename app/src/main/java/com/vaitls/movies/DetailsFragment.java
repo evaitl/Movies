@@ -16,13 +16,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.muller.snappingrecyclerview.SnappingRecyclerView;
 
 /**
  * Created by evaitl on 8/1/16.
+ * <p/>
+ * A v4 PagerAdapter doesn't deal well with changes in the underlying lists.
+ * There is no notifyRangeChanged() etcetera calls. Even though we are paging,
+ * I went with a v7 RecyclerView so I can use the better adapter.
+ * <p/>
+ * RecyclerViews don't snap into place they way a ViewPager does, so I added
+ * an RecyclerView.OnScrollListener to scroll into position whenever the scrolling
+ * goes idle.
  */
 public class DetailsFragment extends Fragment {
-    private static final String TAG=DetailsFragment.class.getSimpleName();
+    private static final String TAG = DetailsFragment.class.getSimpleName();
     private static final String ARG_IDX = "four score and seven";
     private static final String ARG_SO = "years ago our ...";
     private MovieDataCache mDC;
@@ -48,42 +55,69 @@ public class DetailsFragment extends Fragment {
             mDetailsAdapter.setSearchOrder(searchOrder);
         }
     }
+
     void setIndex(int idx) {
         mLayoutManager.scrollToPosition(idx);
     }
+
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         mDC = MovieDataCache.getInstance();
-        View v = inflater.inflate(R.layout.snapping_recycler_view, container, false);
-        mRecyclerView = (RecyclerView) v.findViewById(R.id.snapping_recycler);
+        View v = inflater.inflate(R.layout.recycler_view, container, false);
+        mRecyclerView = (RecyclerView) v.findViewById(R.id.full_page_recycler_view);
         mLayoutManager = new LinearLayoutManager(getActivity(),
                 LinearLayoutManager.HORIZONTAL, false);
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(new DetailsAdapter(mSearchOrder));
-       // mRecyclerView.setSnapEnabled(true);
+        mRecyclerView.addOnScrollListener(new PagingRecyclerLock());
         return v;
     }
 
-    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        Bundle bundle=getArguments();
-        mSearchOrder=(MovieListType)bundle.getSerializable(ARG_SO);
-        if(mSearchOrder==null){
-            Log.d(TAG,"Default search order");
-            mSearchOrder=MovieListType.POPULAR;
+        Bundle bundle = getArguments();
+        mSearchOrder = (MovieListType) bundle.getSerializable(ARG_SO);
+        if (mSearchOrder == null) {
+            Log.d(TAG, "Default search order");
+            mSearchOrder = MovieListType.POPULAR;
         }
-        mIndex=bundle.getInt(ARG_IDX,0);
-        Log.d(TAG,"df onCreate");
+        mIndex = bundle.getInt(ARG_IDX, 0);
+        Log.d(TAG, "df onCreate");
+    }
+
+    /* This is not general purpose.
+     * Assumes we end up with two views contesting for the full screen.
+     * Whomever is closest to the middle gets it.
+     */
+    class PagingRecyclerLock extends RecyclerView.OnScrollListener {
+        boolean mSettling;
+        @Override
+        public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
+            if (!mSettling && newState == RecyclerView.SCROLL_STATE_IDLE) {
+
+                View v = lm.findViewByPosition(lm.findFirstVisibleItemPosition());
+                if (-v.getLeft() < v.getWidth() / 2) {
+                    recyclerView.smoothScrollToPosition(lm.findFirstVisibleItemPosition());
+                } else {
+                    recyclerView.smoothScrollToPosition(lm.findLastVisibleItemPosition());
+                }
+                mSettling = true;
+            }
+            if (newState == RecyclerView.SCROLL_STATE_DRAGGING ||
+                    newState == RecyclerView.SCROLL_STATE_SETTLING) {
+                mSettling = false;
+            }
+        }
     }
 
     class DetailsAdapter extends RecyclerView.Adapter<DetailsHolder> {
         MovieListType mSearchOrder;
 
         DetailsAdapter(MovieListType searchOrder) {
-            Log.d(TAG,"new da "+ searchOrder);
+            Log.d(TAG, "new da " + searchOrder);
             mSearchOrder = searchOrder;
         }
 
@@ -96,7 +130,7 @@ public class DetailsFragment extends Fragment {
         public DetailsHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             Context context = parent.getContext();
             View v = LayoutInflater.from(context)
-                    .inflate(R.layout.details_scroll_view,parent,false);
+                    .inflate(R.layout.details_scroll_view, parent, false);
             return new DetailsHolder(v);
         }
 
@@ -112,17 +146,17 @@ public class DetailsFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(DetailsHolder h, int position) {
-            Log.d(TAG,"on bindViewHolder " + position);
-            MovieInfo mi=mDC.get(mSearchOrder,position);
+            Log.d(TAG, "on bindViewHolder " + position);
+            MovieInfo mi = mDC.get(mSearchOrder, position);
             h.getTitleTextView().setText(mi.getTitle());
-            h.getRatingTextView().setText(String.format("%.2f",mi.getVote_average()));
+            h.getRatingTextView().setText(String.format("%.2f", mi.getVote_average()));
             h.getPlotTextView().setText(mi.getOverview());
             h.getDateTextView().setText(mi.getRelease_date());
-            boolean favorite=mDC.isFavorite(mi.getId());
+            boolean favorite = mDC.isFavorite(mi.getId());
             h.getFavoriteButton().setImageDrawable(
                     ContextCompat.getDrawable(getContext(),
-                    favorite? R.drawable.ic_gold_star: R.drawable.ic_black_star));
-            String uri="http://image.tmdb.org/t/p/w185"+
+                            favorite ? R.drawable.ic_gold_star : R.drawable.ic_black_star));
+            String uri = "http://image.tmdb.org/t/p/w185" +
                     mi.getPoster_path();
             Glide.with(getContext())
                     .load(uri)
