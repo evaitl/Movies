@@ -12,6 +12,11 @@
         android:theme="@style/AppTheme">
         <activity android:name=".DetailsActivity">
         </activity>
+        <provider
+            android:authorities="@string/content_authority"
+            android:name=".data.MovieProvider"
+            android:exported="false"
+            android:syncable="true" />
         <activity android:name=".MovieActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

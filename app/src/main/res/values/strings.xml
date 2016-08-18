@@ -9,4 +9,5 @@
     <string name="ratings_order">Ratings Order</string>
     <string name="no_network">No Available network</string>
     <string name="favorites">Favorites</string>
+    <string name="content_authority">com.vaitls.movies.app</string>
 </resources>
