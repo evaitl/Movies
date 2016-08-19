@@ -1,4 +1,6 @@
-package com.vaitls.movies;
+package com.vaitls.movies.sync;
+
+import com.vaitls.movies.sync.MovieInfo;
 
 /**
  * Created by evaitl on 7/30/16.

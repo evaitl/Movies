@@ -4,6 +4,9 @@ import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
+import com.vaitls.movies.sync.MovieInfo;
+import com.vaitls.movies.sync.MoviePage;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;

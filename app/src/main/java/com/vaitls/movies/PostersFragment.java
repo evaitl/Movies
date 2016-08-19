@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.vaitls.movies.sync.MovieInfo;
 
 /**
  * Created by evaitl on 7/30/16.

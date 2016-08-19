@@ -1,4 +1,4 @@
-package com.vaitls.movies;
+package com.vaitls.movies.sync;
 
 /**
  * Created by evaitl on 7/30/16.

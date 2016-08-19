@@ -10,4 +10,5 @@
     <string name="no_network">No Available network</string>
     <string name="favorites">Favorites</string>
     <string name="content_authority">com.vaitls.movies.app</string>
+    <string name="sync_account_type">com.vaitls.movie.sync</string>
 </resources>

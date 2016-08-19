@@ -59,7 +59,8 @@ class MovieDBHelper extends SQLiteOpenHelper {
                         "rank integer not null," +
                         "mid integer not null unique on conflict replace," +
                         "expires integer not null);" +
-/*
+
+/*  Mehhh....We aren't displaying these, so why save them?
 
                         "create table genres("+
                         "_id integer primary key autoincrement,"+
@@ -67,13 +68,15 @@ class MovieDBHelper extends SQLiteOpenHelper {
                         "gid integer not null);"+
 */
 
+/*
+Let's not cache these.
                         "create table reviews("+
                         "_id integer primary key autoincrement,"+
                         "mid integer not null,"+
                         "id text,"+
                         "author text,"+
                         "content text not null,"+
-                        "url text,"+
+                        "url text"+
                         ");"+
 
                         "create table videos("+
@@ -83,7 +86,21 @@ class MovieDBHelper extends SQLiteOpenHelper {
                         "iso_639_1 text not null,"+
                         "name text not null,"+
                         "site text not null,"+
-                        "key text not null,"+
+                        "key text not null"+
+                        ");"+
+*/
+/*
+ * Creating a single row of meta information about the db to
+  * keep track of what needs to be fetch next;
+ */
+
+                        "create table meta("+
+                        "_id integer primary key autoincrement,"+
+                        "single integer default 0 unique on conflict replace check (single=0),"+
+                        "last_tr_page integer default 0,"+
+                        "max_tr_page integer,"+
+                        "last_pop_page integer default 0,"+
+                        "max_pop_page integer,"+
                         ");"+
 
                         "create table favorites(" +

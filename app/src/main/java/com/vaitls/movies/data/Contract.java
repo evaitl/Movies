@@ -21,6 +21,7 @@ public class Contract {
     static final int M_VIDEO = 10;
     static final int M_REVIEWS_DIR = 11;
     static final int M_REVIEW = 12;
+    static final int M_META=13;
     static final String CONTENT_AUTH = "com.vaitls.movies.app";
     static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTH);
     static final String FAVORITES = "favorites";
@@ -54,7 +55,11 @@ public class Contract {
             BASE_CONTENT_URI.buildUpon()
                     .appendPath(REVIEW)
                     .build();
-
+    public final String META="meta";
+    public static final Uri META_URI=
+            BASE_CONTENT_URI.buildUpon()
+            .appendPath(META)
+            .build();
     static {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(CONTENT_AUTH, FAVORITES, M_FAVORITES_DIR);
@@ -69,11 +74,19 @@ public class Contract {
         uriMatcher.addURI(CONTENT_AUTH, VIDEO + "/#", M_VIDEO);
         uriMatcher.addURI(CONTENT_AUTH, REVIEW, M_REVIEWS_DIR);
         uriMatcher.addURI(CONTENT_AUTH, REVIEW + "/#", M_REVIEW);
+        uriMatcher.addURI(CONTENT_AUTH,META,M_META);
     }
 
+    public interface Meta{
+        String COL__ID="_id";
+        String COL_LAST_POP_PAGE="last_pop_page";
+        String COL_LAST_TR_PAGE="last_tr_page";
+        String COL_MAX_POP_PAGE="max_pop_page";
+        String COL_MAX_TR_PAGE="max_tr_page";
+    }
     /**
      * These interfaces just exists to collect the column names. I'd make them
-     * final, but java doesn't allow it.
+     * final, but java doesn't let you do final interfaces.
      */
     public interface Movies {
         String COL__ID = "_id";
