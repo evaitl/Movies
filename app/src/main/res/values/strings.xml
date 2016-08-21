@@ -5,8 +5,10 @@
     <string name="rating_label">Rating:</string>
     <string name="plot_label">Plot:</string>
     <string name="favorite_label">Favorite:</string>
+    <string name="list_order">List Order</string>
     <string name="popularity_order">Popularity Order</string>
     <string name="ratings_order">Ratings Order</string>
+    <string name="favorites_order">Favorites Order</string>
     <string name="no_network">No Available network</string>
     <string name="favorites">Favorites</string>
     <string name="content_authority">com.vaitls.movies.app</string>

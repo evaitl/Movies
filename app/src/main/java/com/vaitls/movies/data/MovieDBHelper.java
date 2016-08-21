@@ -45,9 +45,15 @@ class MovieDBHelper extends SQLiteOpenHelper {
                         "plot text not null, " +
                         "poster_path text not null,"+
                         "release_date text not null,"+
-                        "overview text not null,"+
+                        "vote_count integer not null,"+
                         "vote_average real not null);" +
+/*
+I'm not setting the ranks in the lists as unique because data will be fetched
+periodically and we won't ever fetch the whole database in a single swell foop.
 
+Sometimes we will have more than one movie in the local cache with the same rank
+until we get around to updating our local data to fix it. NBD.
+ */
                         "create table popular(" +
                         "_id integer primary key autoincrement, " +
                         "rank integer not null, " +

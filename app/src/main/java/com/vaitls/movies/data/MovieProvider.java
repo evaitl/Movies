@@ -145,7 +145,6 @@ public class MovieProvider extends ContentProvider {
         favoritesProjectionMap.put(Favorites.COL__ID, "movies._id");
         favoritesProjectionMap.put(Favorites.COL_TITLE, "movies.title");
         favoritesProjectionMap.put(Favorites.COL_PLOT, "movies.plot");
-        favoritesProjectionMap.put(Favorites.COL_OVERVIEW, "movies.overview");
         favoritesProjectionMap.put(Favorites.COL_POSTER_PATH,"movies.poster_path");
         favoritesProjectionMap.put(Favorites.COL_RELEASE_DATE,"moves.release_date");
         favoritesProjectionMap.put(Favorites.COL_VOTE_AVERAGE, "movies.vote_average");
@@ -191,21 +190,27 @@ public class MovieProvider extends ContentProvider {
                 qb.setTables("movies inner join favorites on movies.mid=favorites.mid");
                 qb.setProjectionMap(favoritesProjectionMap);
                 if(sortOrder==null){
-                    sortOrder="title";
+                    /*
+                    TODO: 1 utf8 nocase collation function
+                    TODO: 2 title collation -- skips articles (a, the) in sorting.
+
+                    "Die Hard" in a german locale on xbmc always ends up at H....
+                     */
+                    sortOrder="title collate nocase";
                 }
                 break;
             case Contract.M_TOPRATED_DIR:
                 qb.setTables("movies inner join toprated on movies.mid=toprated.mid");
                 qb.setProjectionMap(topRatedProjectionMap);
                 if(sortOrder==null){
-                    sortOrder="rank";
+                    sortOrder="rank asc";
                 }
                 break;
             case Contract.M_POPULAR_DIR:
                 qb.setTables("movies inner join popular on popular.mid=movies.mid");
                 qb.setProjectionMap(popularProjectionMap);
                 if(sortOrder==null){
-                    sortOrder="rank";
+                    sortOrder="rank asc";
                 }
                 break;
             default:

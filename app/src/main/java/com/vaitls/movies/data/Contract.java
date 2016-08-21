@@ -55,7 +55,7 @@ public class Contract {
             BASE_CONTENT_URI.buildUpon()
                     .appendPath(REVIEW)
                     .build();
-    public final String META="meta";
+    static final String META="meta";
     public static final Uri META_URI=
             BASE_CONTENT_URI.buildUpon()
             .appendPath(META)
@@ -95,7 +95,7 @@ public class Contract {
         String COL_PLOT = "plot";
         String COL_POSTER_PATH = "poster_path";
         String COL_RELEASE_DATE = "release_date";
-        String COL_OVERVIEW = "overview";
+        String COL_VOTE_COUNT   = "vote_count";
         String COL_VOTE_AVERAGE = "vote_average";
     }
 

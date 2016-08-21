@@ -1,10 +1,12 @@
 package com.vaitls.movies;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.CursorAdapter;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -33,7 +35,6 @@ public class DetailsFragment extends Fragment {
     private static final String TAG = DetailsFragment.class.getSimpleName();
     private static final String ARG_IDX = "four score and seven";
     private static final String ARG_SO = "years ago our ...";
-    private MovieDataCache mDC;
     private MovieListType mSearchOrder;
     private DetailsAdapter mDetailsAdapter;
     private int mIndex;
@@ -64,6 +65,7 @@ public class DetailsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+
         mDC = MovieDataCache.getInstance();
         View v = inflater.inflate(R.layout.recycler_view, container, false);
         mRecyclerView = (RecyclerView) v.findViewById(R.id.full_page_recycler_view);
@@ -114,13 +116,42 @@ public class DetailsFragment extends Fragment {
         }
     }
 
-    class DetailsAdapter extends RecyclerView.Adapter<DetailsHolder> {
+    class DA2 extends RecyclerView.Adapter<DetailsHolder> implements  CursorAdapter{
+        @Override
+        public int getItemCount() {
+            return 0;
+        }
+
+        @Override
+        public DetailsHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return null;
+        }
+
+        @Override
+        public void onBindViewHolder(DetailsHolder holder, int position) {
+
+        }
+
+        @Override
+        public View newView(Context context, Cursor cursor, ViewGroup parent) {
+            return null;
+        }
+
+        @Override
+        public void bindView(View view, Context context, Cursor cursor) {
+
+        }
+    }
+
+    class DetailsAdapter extends RecyclerView.Adapter<DetailsHolder>  {
         MovieListType mSearchOrder;
 
         DetailsAdapter(MovieListType searchOrder) {
             Log.d(TAG, "new da " + searchOrder);
             mSearchOrder = searchOrder;
         }
+
+
 
         @Override
         public int getItemCount() {

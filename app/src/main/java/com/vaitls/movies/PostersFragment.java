@@ -1,11 +1,17 @@
 package com.vaitls.movies;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
+import android.support.v4.widget.CursorAdapter;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -17,12 +23,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.vaitls.movies.sync.MovieInfo;
-
+import com.vaitls.movies.data.Contract;
+import static com.vaitls.movies.data.Contract.Popular;
+import static com.vaitls.movies.data.Contract.TopRated;
+import static com.vaitls.movies.data.Contract.Favorites;
+import static com.vaitls.movies.data.Contract.Movies;
 /**
  * Created by evaitl on 7/30/16.
  */
-public class PostersFragment extends Fragment {
+public class PostersFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
     private static final String TAG = PostersFragment.class.getSimpleName();
     private PhotoAdapter mPhotoAdapter;
     private MovieListType mSearchOrder;
@@ -35,9 +44,10 @@ public class PostersFragment extends Fragment {
     void setSearchOrder(MovieListType searchOrder) {
         if (mSearchOrder != searchOrder) {
             mSearchOrder = searchOrder;
-            mPhotoAdapter.setSearchOrder(searchOrder);
+            // TODO initLoader?
         }
     }
+
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -60,20 +70,39 @@ public class PostersFragment extends Fragment {
         int columns = getResources().getInteger(R.integer.columns);
         mPostersRecylerView.setLayoutManager(new GridLayoutManager(getActivity(), columns));
         mPostersRecylerView.setHasFixedSize(true);
-        setupAdapter();
-
-
         return v;
     }
 
-    private void setupAdapter() {
-        Log.d(TAG, "setupAdapter:" + isAdded());
-        if (isAdded()) {
-            PhotoAdapter adapter = new PhotoAdapter(this, mSearchOrder);
-            mPhotoAdapter = adapter;
-            mPostersRecylerView.setAdapter(adapter);
+
+    private final static String []PROJECTION={
+            Movies.COL__ID,
+            Movies.COL_MID,
+            Movies.COL_POSTER_PATH,
+    };
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Uri uri=null;
+        if(id==MovieListType.FAVORITE.ordinal()){
+            uri=Contract.FAVORITES_URI;
+        }else if(id==MovieListType.POPULAR.ordinal()){
+            uri=Contract.POPULAR_URI;
+        }else if (id==MovieListType.TOP_RATED.ordinal()){
+            uri=Contract.TOP_RATED_URI;
+        }else{
+            throw new IllegalStateException("unknown loader id "+id);
         }
-        Log.d(TAG, "setupAdapter: done");
+        return new CursorLoader(getActivity(),uri,PROJECTION, null,null, null);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mPhotoAdapter.swapCursor(null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mPhotoAdapter.swapCursor(data);
     }
 
     @Override
@@ -82,6 +111,8 @@ public class PostersFragment extends Fragment {
         setRetainInstance(true);
         setHasOptionsMenu(true);
         mSearchOrder = MovieListType.POPULAR;
+        mPhotoAdapter=new PhotoAdapter(getContext(),null);
+        getLoaderManager().initLoader(mSearchOrder.ordinal(),null,this);
         Log.d(TAG, "onCreate");
     }
 
@@ -92,94 +123,40 @@ public class PostersFragment extends Fragment {
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
-    class  PhotoAdapter extends  RecyclerView.Adapter<PhotoHolder>  {
-
-        private final MovieDataCache mMovieDataCache;
-        private final PostersFragment mPostersFragment;
-        private MovieListType mSearchOrder;
-
-
-
-        public PhotoAdapter(PostersFragment postersFragment,
-                            MovieListType searchOrder){
-            mSearchOrder=searchOrder;
-            mMovieDataCache=MovieDataCache.getInstance();
-            mPostersFragment=postersFragment;
-
-            Log.d(TAG,"constr");
+    class PhotoAdapter extends RecyclerViewCursorAdapter<PhotoHolder>{
+        int mid_col;
+        int poster_col;
+        public PhotoAdapter(Context context, Cursor cursor) {
+            super(context, cursor);
+            mid_col=cursor.getColumnIndexOrThrow(Movies.COL_MID);
+            poster_col=cursor.getColumnIndexOrThrow(Movies.COL_POSTER_PATH);
         }
-
-        void setSearchOrder(MovieListType searchOrder){
-            if(searchOrder==mSearchOrder){
-                return;
-            }
-            notifyItemRangeRemoved(0,mMovieDataCache.getTotal(mSearchOrder));
-            mMovieDataCache.removeAdapter(mSearchOrder,this);
-            mMovieDataCache.addAdapter(searchOrder,this);
-            mSearchOrder=searchOrder;
-        }
-
-        @Override
-        public int getItemCount() {
-            return mMovieDataCache.getTotal(mSearchOrder);
-        }
-
-        @Override
-        public void onBindViewHolder(PhotoHolder holder, int position) {
-            Log.d(TAG,"obvh " +position);
-            holder.bindMovieInfo(mSearchOrder, position);
-        }
-
         @Override
         public PhotoHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             Log.d(TAG,"ocvh");
-            LayoutInflater inflater=LayoutInflater.from(mPostersFragment.getActivity());
+            LayoutInflater inflater=LayoutInflater.from(getActivity());
             View view= inflater.inflate(R.layout.gallery_item,parent,false);
             return new PhotoHolder(view);
         }
 
         @Override
-        public void onAttachedToRecyclerView(RecyclerView recyclerView) {
-            super.onAttachedToRecyclerView(recyclerView);
-            mMovieDataCache.addAdapter(mSearchOrder,this);
-        }
-
-        @Override
-        public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
-            super.onDetachedFromRecyclerView(recyclerView);
-            mMovieDataCache.removeAdapter(mSearchOrder,this);
+        public void onBindViewHolder(PhotoHolder viewHolder, Cursor cursor) {
+            viewHolder.bindImageInfo(cursor.getInt(mid_col),cursor.getString(poster_col));
         }
     }
 
-    class PhotoHolder extends RecyclerView.ViewHolder implements  View.OnClickListener{
-
-        private final ImageView mImageView;
-        private MovieListType mSearchOrder;
-        private MovieInfo mMovieInfo;
-        private final MovieDataCache mdc;
-        private int mIdx;
+    class PhotoHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+        private int mId;
+        private ImageView mImageView;
         public PhotoHolder(View itemView) {
             super(itemView);
-            mImageView = (ImageView) itemView;
-            mdc=MovieDataCache.getInstance();
+            mImageView=(ImageView)itemView;
             mImageView.setOnClickListener(this);
         }
-
-        @Override
-        public void onClick(View v) {
-            Log.d(TAG,"li on click: "+ mSearchOrder + " "+mIdx);
-            MovieActivity movieActivity=(MovieActivity)getActivity();
-            movieActivity.listItemSelected(mSearchOrder, mIdx);
-        }
-
-        public void bindMovieInfo(MovieListType searchOrder, int idx) {
-            mSearchOrder = searchOrder;
-            mIdx=idx;
-            mMovieInfo = mdc.get(searchOrder,idx);
-            String uri="http://image.tmdb.org/t/p/w185"+
-                    mMovieInfo.getPoster_path();
-            Log.d(TAG,"getting movie: "+ uri);
-            Glide.with(mImageView.getContext())
+        void bindImageInfo(int mid, String posterPath){
+            mId=mid;
+            String uri="http://image.tmdb.org/t/p/w185"+posterPath;
+            Glide.with(getContext())
                     .load(uri)
                     .placeholder(R.mipmap.ic_launcher)
                     .error(R.drawable.sad_face)
@@ -188,6 +165,11 @@ public class PostersFragment extends Fragment {
                     .centerCrop()
                     .into(mImageView);
         }
+        @Override
+        public void onClick(View v) {
+            Log.d(TAG,"li on click: "+ mSearchOrder + " ");
+            MovieActivity movieActivity=(MovieActivity)getActivity();
+            movieActivity.listItemSelected(mSearchOrder, mId);
+        }
     }
-
 }

@@ -3,12 +3,15 @@ package com.vaitls.movies;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+
+import com.vaitls.movies.sync.MoviesSyncAdapter;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -39,17 +42,7 @@ public class MovieActivity extends AppCompatActivity {
         }
     }
 
-    private void loadFavorites() {
-        MovieDataCache.setKey(getString(R.string.themoviedb_key));
-        try (ObjectInputStream ois =
-                     new ObjectInputStream(openFileInput(FAVORITES_FILE_NAME))) {
-            MovieDataCache.getInstance().addFavorites((int[]) ois.readObject());
-        } catch (IOException e) {
-            // Don't care
-        } catch (ClassNotFoundException e) {
-            Log.e(TAG, "wtf: ", e);
-        }
-    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -87,7 +80,8 @@ public class MovieActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        loadFavorites();
+        PreferenceManager.setDefaultValues(this,R.xml.settings,false);
+        MoviesSyncAdapter.initializeSyncAdapter(this);
         // main is a resource value based on screen size. It points at
         // either single or two fragment layout.
         setContentView(R.layout.main);

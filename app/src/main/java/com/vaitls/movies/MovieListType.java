@@ -12,7 +12,6 @@ public enum MovieListType {
     MovieListType(String str){
         mName=str;
     }
-
     @Override
     public String toString() {
         return mName;
