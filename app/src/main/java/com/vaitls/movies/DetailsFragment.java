@@ -2,11 +2,14 @@ package com.vaitls.movies;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.widget.CursorAdapter;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -18,7 +21,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.vaitls.movies.sync.MovieInfo;
+import com.vaitls.movies.data.Contract;
+
+import static com.vaitls.movies.data.Contract.Favorites;
 
 /**
  * Created by evaitl on 8/1/16.
@@ -31,16 +36,33 @@ import com.vaitls.movies.sync.MovieInfo;
  * an RecyclerView.OnScrollListener to scroll into position whenever the scrolling
  * goes idle.
  */
-public class DetailsFragment extends Fragment {
+public class DetailsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = DetailsFragment.class.getSimpleName();
     private static final String ARG_IDX = "four score and seven";
     private static final String ARG_SO = "years ago our ...";
+    private static final String[] PROJECTION = {
+            Favorites.COL__ID,
+            Favorites.COL_TITLE,
+            Favorites.COL_RELEASE_DATE,
+            Favorites.COL_PLOT,
+            Favorites.COL_POSTER_PATH,
+            Favorites.COL_FAVORITE,
+            Favorites.COL_VOTE_AVERAGE,
+            Favorites.COL_MID,
+    };
+    private static final int COL__ID = 0;
+    private static final int COL_TITLE = 1;
+    private static final int COL_RELEASE_DATE = 2;
+    private static final int COL_PLOT = 3;
+    private static final int COL_POSTER_PATH = 4;
+    private static final int COL_FAVORITE = 5;
+    private static final int COL_VOTE_AVERAGE = 6;
+    private static final int COL_MID = 7;
     private MovieListType mSearchOrder;
     private DetailsAdapter mDetailsAdapter;
     private int mIndex;
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
-
 
     public static DetailsFragment newInstance(MovieListType searchOrder, int idx) {
         DetailsFragment fragment = new DetailsFragment();
@@ -51,10 +73,38 @@ public class DetailsFragment extends Fragment {
         return fragment;
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Uri uri = null;
+        if (id == MovieListType.FAVORITE.ordinal()) {
+            uri = Contract.FAVORITES_URI;
+        } else if (id == MovieListType.POPULAR.ordinal()) {
+            uri = Contract.POPULAR_URI;
+        } else if (id == MovieListType.TOP_RATED.ordinal()) {
+            uri = Contract.TOP_RATED_URI;
+        } else {
+            throw new IllegalStateException("unknown loader id " + id);
+        }
+        return new CursorLoader(getActivity(), uri, PROJECTION, null, null, null);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mDetailsAdapter.swapCursor(null);
+
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mDetailsAdapter.swapCursor(data);
+        setIndex(mIndex);
+    }
+
     void setSearchOrder(MovieListType searchOrder) {
         if (mSearchOrder != searchOrder) {
             mSearchOrder = searchOrder;
-            mDetailsAdapter.setSearchOrder(searchOrder);
+            mIndex=0;
+            getLoaderManager().initLoader(mSearchOrder.ordinal(),null,this);
         }
     }
 
@@ -66,13 +116,12 @@ public class DetailsFragment extends Fragment {
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
 
-        mDC = MovieDataCache.getInstance();
         View v = inflater.inflate(R.layout.recycler_view, container, false);
         mRecyclerView = (RecyclerView) v.findViewById(R.id.full_page_recycler_view);
         mLayoutManager = new LinearLayoutManager(getActivity(),
-                LinearLayoutManager.HORIZONTAL, false);
+                                                 LinearLayoutManager.HORIZONTAL, false);
         mRecyclerView.setLayoutManager(mLayoutManager);
-        mRecyclerView.setAdapter(new DetailsAdapter(mSearchOrder));
+        mRecyclerView.setAdapter(mDetailsAdapter);
         mRecyclerView.addOnScrollListener(new PagingRecyclerLock());
         return v;
     }
@@ -87,6 +136,8 @@ public class DetailsFragment extends Fragment {
             mSearchOrder = MovieListType.POPULAR;
         }
         mIndex = bundle.getInt(ARG_IDX, 0);
+        mDetailsAdapter = new DetailsAdapter(getContext(), null);
+        getLoaderManager().initLoader(mSearchOrder.ordinal(), null, this);
         Log.d(TAG, "df onCreate");
     }
 
@@ -96,6 +147,7 @@ public class DetailsFragment extends Fragment {
      */
     class PagingRecyclerLock extends RecyclerView.OnScrollListener {
         boolean mSettling;
+
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
@@ -103,10 +155,11 @@ public class DetailsFragment extends Fragment {
 
                 View v = lm.findViewByPosition(lm.findFirstVisibleItemPosition());
                 if (-v.getLeft() < v.getWidth() / 2) {
-                    recyclerView.smoothScrollToPosition(lm.findFirstVisibleItemPosition());
+                    mIndex=lm.findFirstVisibleItemPosition();
                 } else {
-                    recyclerView.smoothScrollToPosition(lm.findLastVisibleItemPosition());
+                    mIndex=lm.findLastVisibleItemPosition();
                 }
+                recyclerView.smoothScrollToPosition(mIndex);
                 mSettling = true;
             }
             if (newState == RecyclerView.SCROLL_STATE_DRAGGING ||
@@ -116,47 +169,12 @@ public class DetailsFragment extends Fragment {
         }
     }
 
-    class DA2 extends RecyclerView.Adapter<DetailsHolder> implements  CursorAdapter{
-        @Override
-        public int getItemCount() {
-            return 0;
+    class DetailsAdapter extends RecyclerViewCursorAdapter<DetailsHolder> {
+
+        public DetailsAdapter(Context context, Cursor cursor) {
+            super(context, cursor);
         }
 
-        @Override
-        public DetailsHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return null;
-        }
-
-        @Override
-        public void onBindViewHolder(DetailsHolder holder, int position) {
-
-        }
-
-        @Override
-        public View newView(Context context, Cursor cursor, ViewGroup parent) {
-            return null;
-        }
-
-        @Override
-        public void bindView(View view, Context context, Cursor cursor) {
-
-        }
-    }
-
-    class DetailsAdapter extends RecyclerView.Adapter<DetailsHolder>  {
-        MovieListType mSearchOrder;
-
-        DetailsAdapter(MovieListType searchOrder) {
-            Log.d(TAG, "new da " + searchOrder);
-            mSearchOrder = searchOrder;
-        }
-
-
-
-        @Override
-        public int getItemCount() {
-            return mDC.getTotal(mSearchOrder);
-        }
 
         @Override
         public DetailsHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -166,30 +184,19 @@ public class DetailsFragment extends Fragment {
             return new DetailsHolder(v);
         }
 
-        void setSearchOrder(MovieListType searchOrder) {
-            if (searchOrder == mSearchOrder) {
-                return;
-            }
-            notifyItemRangeRemoved(0, mDC.getTotal(mSearchOrder));
-            mDC.removeAdapter(mSearchOrder, this);
-            mDC.addAdapter(searchOrder, this);
-            mSearchOrder = searchOrder;
-        }
-
-        @Override
-        public void onBindViewHolder(DetailsHolder h, int position) {
-            Log.d(TAG, "on bindViewHolder " + position);
-            MovieInfo mi = mDC.get(mSearchOrder, position);
-            h.getTitleTextView().setText(mi.getTitle());
-            h.getRatingTextView().setText(String.format("%.2f", mi.getVote_average()));
-            h.getPlotTextView().setText(mi.getOverview());
-            h.getDateTextView().setText(mi.getRelease_date());
-            boolean favorite = mDC.isFavorite(mi.getId());
+            @Override
+        public void onBindViewHolder(DetailsHolder h, Cursor cursor) {
+            h.getDateTextView().setText(cursor.getString(COL_RELEASE_DATE));
+            h.getPlotTextView().setText(cursor.getString(COL_PLOT));
+            h.getRatingTextView().setText(String.format("%.2f", cursor.getFloat(COL_VOTE_AVERAGE)));
+            h.getTitleTextView().setText(cursor.getString(COL_TITLE));
             h.getFavoriteButton().setImageDrawable(
                     ContextCompat.getDrawable(getContext(),
-                            favorite ? R.drawable.ic_gold_star : R.drawable.ic_black_star));
+                                              cursor.getInt(
+                                                      COL_FAVORITE) == 1 ? R.drawable
+                                                      .ic_gold_star : R.drawable.ic_black_star));
             String uri = "http://image.tmdb.org/t/p/w185" +
-                    mi.getPoster_path();
+                    cursor.getString(COL_POSTER_PATH);
             Glide.with(getContext())
                     .load(uri)
                     .placeholder(R.mipmap.ic_launcher)
@@ -214,7 +221,8 @@ public class DetailsFragment extends Fragment {
             mTitleTextView = (TextView) v.findViewById(R.id.fragment_details_title_text_view);
             mDateTextView = (TextView) v.findViewById(R.id.fragment_details_date_text_view);
             mRatingTextView = (TextView) v.findViewById(R.id.fragment_details_rating_text_view);
-            mFavoriteButton = (ImageButton) v.findViewById(R.id.fragment_details_favorite_image_button);
+            mFavoriteButton = (ImageButton) v.findViewById(
+                    R.id.fragment_details_favorite_image_button);
             mPlotTextView = (TextView) v.findViewById(R.id.fragment_details_plot_text_view);
             mThumbnail = (ImageView) v.findViewById(R.id.fragment_details_thubnail_image_view);
         }

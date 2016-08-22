@@ -23,15 +23,6 @@ public class MovieActivity extends AppCompatActivity {
     private PostersFragment mPostersFragment;
     private DetailsFragment mDetailsFragment;
 
-    private void saveFavorites() {
-        try (ObjectOutputStream oos =
-                     new ObjectOutputStream(openFileOutput(FAVORITES_FILE_NAME,
-                             Context.MODE_PRIVATE))) {
-            oos.writeObject(MovieDataCache.getInstance().getFavorites());
-        } catch (Exception e) {
-            Log.e(TAG, "wtf: ", e);
-        }
-    }
 
     void listItemSelected(MovieListType searchOrder, int idx){
         if(mDetailsFragment==null){
@@ -41,9 +32,13 @@ public class MovieActivity extends AppCompatActivity {
             mDetailsFragment.setIndex(idx);
         }
     }
-
-
-
+    void detailsItemSelected(int idx){
+        /*
+        if(mPostersFragment){
+            TODO  mPostersFragment.setIndex(idx);
+        }
+        */
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -120,6 +115,5 @@ public class MovieActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        saveFavorites();
     }
 }

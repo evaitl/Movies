@@ -111,7 +111,10 @@ Let's not cache these.
 
                         "create table favorites(" +
                         "_id integer primary key autoincrement," +
-                        "mid integer not null unique on conflict ignore);" +
+                        "mid integer not null unique on conflict ignore," +
+// OK. This is stupid, but it makes my life easier.
+                        "favorite integer not null default 1 check (favorite=1)"+
+                        ");" +
 
                         "";
         db.execSQL(SQL_CREATE_TABLES);

@@ -100,16 +100,15 @@ public class Contract {
     }
 
     public interface Favorites extends Movies {
-
+        String COL_FAVORITE="favorite";
     }
 
-    public interface TopRated extends Movies {
+    public interface TopRated extends Favorites {
         String COL_RANK = "rank";
         String COL_EXPIRES = "expires";
     }
 
     public interface Popular extends TopRated {
-
     }
 
     public interface Reviews extends Movies {

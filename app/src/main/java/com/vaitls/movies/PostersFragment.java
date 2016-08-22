@@ -11,7 +11,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.CursorAdapter;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -24,15 +23,22 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.vaitls.movies.data.Contract;
-import static com.vaitls.movies.data.Contract.Popular;
-import static com.vaitls.movies.data.Contract.TopRated;
-import static com.vaitls.movies.data.Contract.Favorites;
+
 import static com.vaitls.movies.data.Contract.Movies;
+
 /**
  * Created by evaitl on 7/30/16.
  */
-public class PostersFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
+public class PostersFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = PostersFragment.class.getSimpleName();
+    private final static String[] PROJECTION = {
+            Movies.COL__ID,
+            Movies.COL_MID,
+            Movies.COL_POSTER_PATH,
+    };
+    private static final int COL__ID=0;
+    private static final int COL_MID=1;
+    private static final int COL_POSTER_PATH=2;
     private PhotoAdapter mPhotoAdapter;
     private MovieListType mSearchOrder;
     private RecyclerView mPostersRecylerView;
@@ -44,10 +50,9 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
     void setSearchOrder(MovieListType searchOrder) {
         if (mSearchOrder != searchOrder) {
             mSearchOrder = searchOrder;
-            // TODO initLoader?
+            getLoaderManager().initLoader(mSearchOrder.ordinal(),null,this);
         }
     }
-
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -73,26 +78,19 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
         return v;
     }
 
-
-    private final static String []PROJECTION={
-            Movies.COL__ID,
-            Movies.COL_MID,
-            Movies.COL_POSTER_PATH,
-    };
-
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Uri uri=null;
-        if(id==MovieListType.FAVORITE.ordinal()){
-            uri=Contract.FAVORITES_URI;
-        }else if(id==MovieListType.POPULAR.ordinal()){
-            uri=Contract.POPULAR_URI;
-        }else if (id==MovieListType.TOP_RATED.ordinal()){
-            uri=Contract.TOP_RATED_URI;
-        }else{
-            throw new IllegalStateException("unknown loader id "+id);
+        Uri uri = null;
+        if (id == MovieListType.FAVORITE.ordinal()) {
+            uri = Contract.FAVORITES_URI;
+        } else if (id == MovieListType.POPULAR.ordinal()) {
+            uri = Contract.POPULAR_URI;
+        } else if (id == MovieListType.TOP_RATED.ordinal()) {
+            uri = Contract.TOP_RATED_URI;
+        } else {
+            throw new IllegalStateException("unknown loader id " + id);
         }
-        return new CursorLoader(getActivity(),uri,PROJECTION, null,null, null);
+        return new CursorLoader(getActivity(), uri, PROJECTION, null, null, null);
     }
 
     @Override
@@ -111,8 +109,8 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
         setRetainInstance(true);
         setHasOptionsMenu(true);
         mSearchOrder = MovieListType.POPULAR;
-        mPhotoAdapter=new PhotoAdapter(getContext(),null);
-        getLoaderManager().initLoader(mSearchOrder.ordinal(),null,this);
+        mPhotoAdapter = new PhotoAdapter(getContext(), null);
+        getLoaderManager().initLoader(mSearchOrder.ordinal(), null, this);
         Log.d(TAG, "onCreate");
     }
 
@@ -123,39 +121,41 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
 
-    class PhotoAdapter extends RecyclerViewCursorAdapter<PhotoHolder>{
-        int mid_col;
-        int poster_col;
+    class PhotoAdapter extends RecyclerViewCursorAdapter<PhotoHolder> {
+
+
         public PhotoAdapter(Context context, Cursor cursor) {
             super(context, cursor);
-            mid_col=cursor.getColumnIndexOrThrow(Movies.COL_MID);
-            poster_col=cursor.getColumnIndexOrThrow(Movies.COL_POSTER_PATH);
+
         }
+
         @Override
         public PhotoHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            Log.d(TAG,"ocvh");
-            LayoutInflater inflater=LayoutInflater.from(getActivity());
-            View view= inflater.inflate(R.layout.gallery_item,parent,false);
+            Log.d(TAG, "ocvh");
+            LayoutInflater inflater = LayoutInflater.from(getActivity());
+            View view = inflater.inflate(R.layout.gallery_item, parent, false);
             return new PhotoHolder(view);
         }
 
         @Override
         public void onBindViewHolder(PhotoHolder viewHolder, Cursor cursor) {
-            viewHolder.bindImageInfo(cursor.getInt(mid_col),cursor.getString(poster_col));
+            viewHolder.bindImageInfo(cursor.getInt(COL_MID), cursor.getString(COL_POSTER_PATH));
         }
     }
 
-    class PhotoHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    class PhotoHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private int mId;
         private ImageView mImageView;
+
         public PhotoHolder(View itemView) {
             super(itemView);
-            mImageView=(ImageView)itemView;
+            mImageView = (ImageView) itemView;
             mImageView.setOnClickListener(this);
         }
-        void bindImageInfo(int mid, String posterPath){
-            mId=mid;
-            String uri="http://image.tmdb.org/t/p/w185"+posterPath;
+
+        void bindImageInfo(int mid, String posterPath) {
+            mId = mid;
+            String uri = "http://image.tmdb.org/t/p/w185" + posterPath;
             Glide.with(getContext())
                     .load(uri)
                     .placeholder(R.mipmap.ic_launcher)
@@ -165,10 +165,11 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
                     .centerCrop()
                     .into(mImageView);
         }
+
         @Override
         public void onClick(View v) {
-            Log.d(TAG,"li on click: "+ mSearchOrder + " ");
-            MovieActivity movieActivity=(MovieActivity)getActivity();
+            Log.d(TAG, "li on click: " + mSearchOrder + " ");
+            MovieActivity movieActivity = (MovieActivity) getActivity();
             movieActivity.listItemSelected(mSearchOrder, mId);
         }
     }

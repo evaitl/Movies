@@ -6,6 +6,7 @@ import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
@@ -148,6 +149,7 @@ public class MovieProvider extends ContentProvider {
         favoritesProjectionMap.put(Favorites.COL_POSTER_PATH,"movies.poster_path");
         favoritesProjectionMap.put(Favorites.COL_RELEASE_DATE,"moves.release_date");
         favoritesProjectionMap.put(Favorites.COL_VOTE_AVERAGE, "movies.vote_average");
+        favoritesProjectionMap.put(Favorites.COL_FAVORITE, "favorites.favorite");
 
         topRatedProjectionMap = new HashMap<>(favoritesProjectionMap);
         topRatedProjectionMap.put(TopRated.COL_RANK, "toprated.rank");
@@ -200,14 +202,17 @@ public class MovieProvider extends ContentProvider {
                 }
                 break;
             case Contract.M_TOPRATED_DIR:
-                qb.setTables("movies inner join toprated on movies.mid=toprated.mid");
+                qb.setTables("movies inner join toprated on movies.mid=toprated.mid "+
+                        "left join favorites on movies.mid=favorites.mid"
+               );
                 qb.setProjectionMap(topRatedProjectionMap);
                 if(sortOrder==null){
                     sortOrder="rank asc";
                 }
                 break;
             case Contract.M_POPULAR_DIR:
-                qb.setTables("movies inner join popular on popular.mid=movies.mid");
+                qb.setTables("movies inner join popular on popular.mid=movies.mid "+
+                "left join favorites on movies.mid=favorites.mid");
                 qb.setProjectionMap(popularProjectionMap);
                 if(sortOrder==null){
                     sortOrder="rank asc";

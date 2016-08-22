@@ -30,11 +30,19 @@
             </intent-filter>
         </activity>
 
+        <service
+            android:name=".sync.StubAuthenticatorService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/stub_authenticator" />
+        </service>
 
         <service
             android:name=".sync.MoviesSyncService"
-            android:exported="false"
-            android:process=":sync">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.content.SyncAdapter"/>
             </intent-filter>
