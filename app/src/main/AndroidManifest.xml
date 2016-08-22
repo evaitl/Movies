@@ -31,13 +31,13 @@
         </activity>
 
         <service
-            android:name=".sync.StubAuthenticatorService">
+            android:name=".sync.MoviesAuthenticatorService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator"/>
             </intent-filter>
             <meta-data
                 android:name="android.accounts.AccountAuthenticator"
-                android:resource="@xml/stub_authenticator" />
+                android:resource="@xml/authenticator" />
         </service>
 
         <service

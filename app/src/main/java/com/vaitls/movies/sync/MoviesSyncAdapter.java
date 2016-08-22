@@ -332,14 +332,17 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         //return activeNetworkInfo != null && activeNetworkInfo.isConnected();
         if (activeNetworkInfo == null || !activeNetworkInfo.isConnected()) {
+            Log.d(TAG,"h3");
             return false;
         }
+     /*   Log.d(TAG,"h1");
         try {
             return InetAddress.getByName("themoviedb.org").isReachable(1000);
         } catch (IOException e) {
             Log.e(TAG, "server not reachable", e);
         }
-        return false;
+        Log.d(TAG,"h2");*/
+        return true;
     }
 
     /**
