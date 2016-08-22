@@ -33,12 +33,10 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
     private static final String TAG = PostersFragment.class.getSimpleName();
     private final static String[] PROJECTION = {
             Movies.COL__ID,
-            Movies.COL_MID,
             Movies.COL_POSTER_PATH,
     };
     private static final int COL__ID=0;
-    private static final int COL_MID=1;
-    private static final int COL_POSTER_PATH=2;
+    private static final int COL_POSTER_PATH=1;
     private PhotoAdapter mPhotoAdapter;
     private MovieListType mSearchOrder;
     private RecyclerView mPostersRecylerView;
@@ -73,6 +71,8 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
         View v = inflater.inflate(R.layout.recycler_view, container, false);
         mPostersRecylerView = (RecyclerView) v.findViewById(R.id.full_page_recycler_view);
         int columns = getResources().getInteger(R.integer.columns);
+        Log.d(TAG, "setting adapter to "+mPhotoAdapter);
+        mPostersRecylerView.setAdapter(mPhotoAdapter);
         mPostersRecylerView.setLayoutManager(new GridLayoutManager(getActivity(), columns));
         mPostersRecylerView.setHasFixedSize(true);
         return v;
@@ -139,12 +139,11 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
 
         @Override
         public void onBindViewHolder(PhotoHolder viewHolder, Cursor cursor) {
-            viewHolder.bindImageInfo(cursor.getInt(COL_MID), cursor.getString(COL_POSTER_PATH));
+            viewHolder.bindImageInfo(cursor.getString(COL_POSTER_PATH));
         }
     }
 
     class PhotoHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        private int mId;
         private ImageView mImageView;
 
         public PhotoHolder(View itemView) {
@@ -153,8 +152,7 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
             mImageView.setOnClickListener(this);
         }
 
-        void bindImageInfo(int mid, String posterPath) {
-            mId = mid;
+        void bindImageInfo(String posterPath) {
             String uri = "http://image.tmdb.org/t/p/w185" + posterPath;
             Glide.with(getContext())
                     .load(uri)
@@ -170,7 +168,7 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
         public void onClick(View v) {
             Log.d(TAG, "li on click: " + mSearchOrder + " ");
             MovieActivity movieActivity = (MovieActivity) getActivity();
-            movieActivity.listItemSelected(mSearchOrder, mId);
+            movieActivity.listItemSelected(mSearchOrder, getAdapterPosition());
         }
     }
 }

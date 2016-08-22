@@ -6,19 +6,19 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import com.vaitls.movies.data.Contract;
 
 /**
  * Created by evaitl on 8/19/16.
  */
 public class MoviesSyncService  extends Service{
-    private final String TAG=MoviesSyncService.class.getSimpleName();
+    private static final String TAG=MoviesSyncService.class.getSimpleName();
     private static final Object sLock=new Object();
     private static MoviesSyncAdapter sMoviesSyncAdapter;
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        Log.d(TAG,"onBind");
         return sMoviesSyncAdapter.getSyncAdapterBinder();
     }
 

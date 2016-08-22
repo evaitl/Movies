@@ -74,12 +74,14 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
 
     public MoviesSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
+        Log.d(TAG,"constructor");
         mContentResolver = context.getContentResolver();
     }
 
     public MoviesSyncAdapter(Context context, boolean autoInitialize,
                              boolean allowParallelSyncs) {
         super(context, autoInitialize, allowParallelSyncs);
+        Log.d(TAG,"construrcture 2");
         mContentResolver = context.getContentResolver();
     }
 
@@ -89,6 +91,7 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
      * @param context The context used to access the account service
      */
     public static void syncImmediately(Context context) {
+        Log.d(TAG,"syncImmediately");
         Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
@@ -168,7 +171,6 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
     public static void initializeSyncAdapter(Context context) {
         sApiKey = context.getString(R.string.themoviedb_key);
         getSyncAccount(context);
-
     }
 
     private void getDbMeta() {
@@ -239,6 +241,7 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
      * Our db will be a bit behind anyhow, so no reason to get picky.
      */
     private void prefetch() {
+        Log.d(TAG,"prefetching...");
         try {
             int nextPopPage = lastPopPage % maxPopPage + 1;
             for (int i = 0; i < PRECACHE_PAGES; ++i) {

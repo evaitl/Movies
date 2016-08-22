@@ -3,16 +3,17 @@ package com.vaitls.movies.data;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 /**
  * Created by evaitl on 8/16/16.
- * <p/>
+ * <p>
  * TODO: Clean this up to use a contract.
  */
 class MovieDBHelper extends SQLiteOpenHelper {
     private static final String TAG = MovieDBHelper.class.getSimpleName();
     private static final String DATABASE_NAME = "movies.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     public MovieDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -20,33 +21,30 @@ class MovieDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        final String CLEAN_TABLES =
-                "drop table if exists movies;" +
-                        "drop table if exists popular;" +
-                        "drop table if exists toprated;" +
-                        //"drop table if exists genres;"+
-                        "drop table if exists reviews;"+
-                        "drop table if exists videos;"+
-                        "drop table if exists favorites;" +
-                        "";
-        if(oldVersion!=newVersion) {
-            db.execSQL(CLEAN_TABLES);
+        Log.d(TAG, "cleaning tables");
+        if (oldVersion != newVersion) {
+            db.execSQL("drop table if exists movies;");
+            db.execSQL("drop table if exists toprated;");
+            db.execSQL("drop table if exists reviews;");
+            db.execSQL("drop table if exists videos;");
+            db.execSQL("drop table if exists favorites;");
             onCreate(db);
         }
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        final String SQL_CREATE_TABLES =
+        Log.d(TAG, "creating tables");
+        db.execSQL(
                 "create table movies(" +
                         "_id integer primary key autoincrement, " +
                         "mid integer not null unique on conflict replace, " +
                         "title text not null, " +
                         "plot text not null, " +
-                        "poster_path text not null,"+
-                        "release_date text not null,"+
-                        "vote_count integer not null,"+
-                        "vote_average real not null);" +
+                        "poster_path text not null," +
+                        "release_date text not null," +
+                        "vote_count integer not null," +
+                        "vote_average real not null);");
 /*
 I'm not setting the ranks in the lists as unique because data will be fetched
 periodically and we won't ever fetch the whole database in a single swell foop.
@@ -54,17 +52,18 @@ periodically and we won't ever fetch the whole database in a single swell foop.
 Sometimes we will have more than one movie in the local cache with the same rank
 until we get around to updating our local data to fix it. NBD.
  */
-                        "create table popular(" +
+        db.execSQL(
+                "create table popular(" +
                         "_id integer primary key autoincrement, " +
                         "rank integer not null, " +
                         "mid integer not null unique on conflict replace," +
-                        "expires integer not null);" +
-
-                        "create table toprated(" +
+                        "expires integer not null);");
+        db.execSQL(
+                "create table toprated(" +
                         "_id integer primary key autoincrement," +
                         "rank integer not null," +
                         "mid integer not null unique on conflict replace," +
-                        "expires integer not null);" +
+                        "expires integer not null);");
 
 /*  Mehhh....We aren't displaying these, so why save them?
 
@@ -99,24 +98,22 @@ Let's not cache these.
  * Creating a single row of meta information about the db to
   * keep track of what needs to be fetch next;
  */
-
-                        "create table meta("+
-                        "_id integer primary key autoincrement,"+
-                        "single integer default 0 unique on conflict replace check (single=0),"+
-                        "last_tr_page integer default 0,"+
-                        "max_tr_page integer,"+
-                        "last_pop_page integer default 0,"+
-                        "max_pop_page integer,"+
-                        ");"+
-
-                        "create table favorites(" +
+        db.execSQL(
+                "create table meta(" +
+                        "_id integer primary key autoincrement, " +
+                        "single integer default 0 unique on conflict replace check (single=0), " +
+                        "last_tr_page integer default 0, " +
+                        "max_tr_page integer, " +
+                        "last_pop_page integer default 0, " +
+                        "max_pop_page integer " +
+                        ");");
+        db.execSQL(
+                "create table favorites(" +
                         "_id integer primary key autoincrement," +
                         "mid integer not null unique on conflict ignore," +
 // OK. This is stupid, but it makes my life easier.
-                        "favorite integer not null default 1 check (favorite=1)"+
-                        ");" +
+                        "favorite integer not null default 1 check (favorite=1)" +
+                        ");");
 
-                        "";
-        db.execSQL(SQL_CREATE_TABLES);
     }
 }

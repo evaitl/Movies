@@ -28,7 +28,6 @@ public class MovieActivity extends AppCompatActivity {
         if(mDetailsFragment==null){
             Intent intent=DetailsActivity.newIntent(getApplicationContext(), searchOrder,idx);
             startActivity(intent);
-        }else {
             mDetailsFragment.setIndex(idx);
         }
     }
