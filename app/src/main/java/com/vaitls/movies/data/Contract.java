@@ -34,10 +34,10 @@ public class Contract {
             BASE_CONTENT_URI.buildUpon()
                     .appendPath(POPULAR)
                     .build();
-    static final String TOP_RATED = "top_rated";
+    static final String TOPRATED = "toprated";
     public static final Uri TOP_RATED_URI =
             BASE_CONTENT_URI.buildUpon()
-                    .appendPath(TOP_RATED)
+                    .appendPath(TOPRATED)
                     .build();
     static final String MOVIE = "movies";
     public static final Uri MOVIE_INFO_URI =
@@ -64,8 +64,8 @@ public class Contract {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(CONTENT_AUTH, FAVORITES, M_FAVORITES_DIR);
         uriMatcher.addURI(CONTENT_AUTH, FAVORITES + "/#", M_FAVORITE);
-        uriMatcher.addURI(CONTENT_AUTH, TOP_RATED, M_TOPRATED_DIR);
-        uriMatcher.addURI(CONTENT_AUTH, TOP_RATED + "/#", M_TOPRATED);
+        uriMatcher.addURI(CONTENT_AUTH, TOPRATED, M_TOPRATED_DIR);
+        uriMatcher.addURI(CONTENT_AUTH, TOPRATED + "/#", M_TOPRATED);
         uriMatcher.addURI(CONTENT_AUTH, POPULAR, M_POPULAR_DIR);
         uriMatcher.addURI(CONTENT_AUTH, POPULAR + "/#", M_POPULAR);
         uriMatcher.addURI(CONTENT_AUTH, MOVIE, M_MOVIES_DIR);

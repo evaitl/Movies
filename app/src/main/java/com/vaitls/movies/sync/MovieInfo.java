@@ -34,7 +34,18 @@ class MovieInfo {
     private String status;
     private String tagline;
 
-
+    /**
+     * @return Can we put this in the movies db?
+     */
+    boolean isGoodData(){
+        return id>0 &&
+                poster_path !=null &&
+                title !=null &&
+                release_date !=null &&
+                overview !=null &&
+                vote_average >0 &&
+                vote_count>0;
+    }
     /**
      * Private constructor: Only create these with gson.
      */

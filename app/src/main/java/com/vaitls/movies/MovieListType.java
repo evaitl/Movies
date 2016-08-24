@@ -5,7 +5,7 @@ package com.vaitls.movies;
  */
 public enum MovieListType {
     POPULAR("popular"),
-    TOP_RATED("top_rated"),
+    TOPRATED("top_rated"),
     FAVORITE("favorite");
 
     private final String mName;

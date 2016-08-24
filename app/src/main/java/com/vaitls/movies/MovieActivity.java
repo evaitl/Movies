@@ -1,6 +1,5 @@
 package com.vaitls.movies;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -13,10 +12,6 @@ import android.view.MenuItem;
 
 import com.vaitls.movies.sync.MoviesSyncAdapter;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-
 public class MovieActivity extends AppCompatActivity {
     private static final String FAVORITES_FILE_NAME = "movies_favorites.objs";
     private static final String TAG = MovieActivity.class.getSimpleName();
@@ -25,9 +20,10 @@ public class MovieActivity extends AppCompatActivity {
 
 
     void listItemSelected(MovieListType searchOrder, int idx){
-        if(mDetailsFragment==null){
-            Intent intent=DetailsActivity.newIntent(getApplicationContext(), searchOrder,idx);
+        if(mDetailsFragment==null) {
+            Intent intent = DetailsActivity.newIntent(getApplicationContext(), searchOrder, idx);
             startActivity(intent);
+        }else{
             mDetailsFragment.setIndex(idx);
         }
     }
@@ -56,7 +52,7 @@ public class MovieActivity extends AppCompatActivity {
                 searchOrder = MovieListType.POPULAR;
                 break;
             case R.id.menu_item_ratings_order:
-                searchOrder = MovieListType.TOP_RATED;
+                searchOrder = MovieListType.TOPRATED;
                 break;
         }
         if (searchOrder != null) {

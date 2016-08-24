@@ -107,6 +107,12 @@ Let's not cache these.
                         "last_pop_page integer default 0, " +
                         "max_pop_page integer " +
                         ");");
+        db.execSQL("create table genre_names("+
+                "_id integer primary key autoincrement, "+
+                "id integer unique not null, "+
+                "name text not null"+
+                ");"
+        );
         db.execSQL(
                 "create table favorites(" +
                         "_id integer primary key autoincrement," +

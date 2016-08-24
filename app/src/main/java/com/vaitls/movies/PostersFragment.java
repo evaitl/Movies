@@ -85,7 +85,7 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
             uri = Contract.FAVORITES_URI;
         } else if (id == MovieListType.POPULAR.ordinal()) {
             uri = Contract.POPULAR_URI;
-        } else if (id == MovieListType.TOP_RATED.ordinal()) {
+        } else if (id == MovieListType.TOPRATED.ordinal()) {
             uri = Contract.TOP_RATED_URI;
         } else {
             throw new IllegalStateException("unknown loader id " + id);
@@ -110,6 +110,7 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
         setHasOptionsMenu(true);
         mSearchOrder = MovieListType.POPULAR;
         mPhotoAdapter = new PhotoAdapter(getContext(), null);
+        mPhotoAdapter.setHasStableIds(true);
         getLoaderManager().initLoader(mSearchOrder.ordinal(), null, this);
         Log.d(TAG, "onCreate");
     }
@@ -131,7 +132,6 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
 
         @Override
         public PhotoHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            Log.d(TAG, "ocvh");
             LayoutInflater inflater = LayoutInflater.from(getActivity());
             View view = inflater.inflate(R.layout.gallery_item, parent, false);
             return new PhotoHolder(view);

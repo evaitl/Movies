@@ -80,7 +80,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             uri = Contract.FAVORITES_URI;
         } else if (id == MovieListType.POPULAR.ordinal()) {
             uri = Contract.POPULAR_URI;
-        } else if (id == MovieListType.TOP_RATED.ordinal()) {
+        } else if (id == MovieListType.TOPRATED.ordinal()) {
             uri = Contract.TOP_RATED_URI;
         } else {
             throw new IllegalStateException("unknown loader id " + id);
@@ -103,8 +103,8 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
     void setSearchOrder(MovieListType searchOrder) {
         if (mSearchOrder != searchOrder) {
             mSearchOrder = searchOrder;
-            mIndex=0;
-            getLoaderManager().initLoader(mSearchOrder.ordinal(),null,this);
+            mIndex = 0;
+            getLoaderManager().initLoader(mSearchOrder.ordinal(), null, this);
         }
     }
 
@@ -155,12 +155,16 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
 
                 View v = lm.findViewByPosition(lm.findFirstVisibleItemPosition());
                 if (-v.getLeft() < v.getWidth() / 2) {
-                    mIndex=lm.findFirstVisibleItemPosition();
+                    mIndex = lm.findFirstVisibleItemPosition();
                 } else {
-                    mIndex=lm.findLastVisibleItemPosition();
+                    mIndex = lm.findLastVisibleItemPosition();
                 }
                 recyclerView.smoothScrollToPosition(mIndex);
                 mSettling = true;
+                DetailsHolder h=(DetailsHolder) recyclerView.findViewHolderForAdapterPosition(mIndex);
+                if(h!=null){
+                    h.loadTrailers();
+                }
             }
             if (newState == RecyclerView.SCROLL_STATE_DRAGGING ||
                     newState == RecyclerView.SCROLL_STATE_SETTLING) {
@@ -184,17 +188,87 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             return new DetailsHolder(v);
         }
 
-            @Override
+        @Override
         public void onBindViewHolder(DetailsHolder h, Cursor cursor) {
-            h.getDateTextView().setText(cursor.getString(COL_RELEASE_DATE));
-            h.getPlotTextView().setText(cursor.getString(COL_PLOT));
-            h.getRatingTextView().setText(String.format("%.2f", cursor.getFloat(COL_VOTE_AVERAGE)));
-            h.getTitleTextView().setText(cursor.getString(COL_TITLE));
-            h.getFavoriteButton().setImageDrawable(
+            h.bind(cursor);
+
+        }
+
+        /**
+         * Possible cancel any trailer loads here?
+         * @param holder
+         */
+        @Override
+        public void onViewRecycled(DetailsHolder holder) {
+            super.onViewRecycled(holder);
+        }
+    }
+
+    class DetailsHolder extends RecyclerView.ViewHolder implements View.OnClickListener, LoaderManager.LoaderCallbacks {
+        private final int LOADER_FAVORITES=1;
+        private final int LOADER_REVIEWS=2;
+        private final int LOADER_TRAILERS=3;
+        private Loader mFavoritesLoader;
+        private Loader mReviewsLoader;
+        private Loader mTrailersLoader;
+        private TextView mTitleTextView;
+        private TextView mDateTextView;
+        private TextView mRatingTextView;
+        private ImageButton mFavoriteButton;
+        private TextView mPlotTextView;
+        private ImageView mThumbnail;
+        private int mMid;
+        private boolean mFavorite;
+        public DetailsHolder(View v) {
+            super(v);
+            mTitleTextView = (TextView) v.findViewById(R.id.fragment_details_title_text_view);
+            mDateTextView = (TextView) v.findViewById(R.id.fragment_details_date_text_view);
+            mRatingTextView = (TextView) v.findViewById(R.id.fragment_details_rating_text_view);
+            mFavoriteButton = (ImageButton) v.findViewById(
+                    R.id.fragment_details_favorite_image_button);
+            mFavoriteButton.setOnClickListener(this);
+            mPlotTextView = (TextView) v.findViewById(R.id.fragment_details_plot_text_view);
+            mThumbnail = (ImageView) v.findViewById(R.id.fragment_details_thubnail_image_view);
+        }
+        private void setFavoriteImage(){
+            mFavoriteButton.setImageDrawable(
                     ContextCompat.getDrawable(getContext(),
-                                              cursor.getInt(
-                                                      COL_FAVORITE) == 1 ? R.drawable
-                                                      .ic_gold_star : R.drawable.ic_black_star));
+                                              mFavorite ? R.drawable.ic_gold_star
+                                                      : R.drawable.ic_black_star));
+        }
+
+        /**
+         * Called to set the trailers and reviews.
+         */
+        void loadTrailers(){
+
+        }
+        /*
+
+         */
+        private void clearOldLoaders(){
+            if(mFavoritesLoader!=null){
+                mFavoritesLoader.cancelLoad();
+                mFavoritesLoader=null;
+            }
+            if(mTrailersLoader!=null){
+                mTrailersLoader.cancelLoad();
+                mTrailersLoader=null;
+            }
+            if(mReviewsLoader!=null){
+                mReviewsLoader.cancelLoad();
+                mReviewsLoader=null;
+            }
+        }
+        void bind(Cursor cursor) {
+            clearOldLoaders();
+            mFavorite=cursor.getInt(COL_FAVORITE)==1;
+            mMid = cursor.getInt(COL_MID);
+            mDateTextView.setText(cursor.getString(COL_RELEASE_DATE));
+            mPlotTextView.setText(cursor.getString(COL_PLOT));
+            mRatingTextView.setText(String.format("%.2f", cursor.getFloat(COL_VOTE_AVERAGE)));
+            mTitleTextView.setText(cursor.getString(COL_TITLE));
+            setFavoriteImage();
             String uri = "http://image.tmdb.org/t/p/w185" +
                     cursor.getString(COL_POSTER_PATH);
             Glide.with(getContext())
@@ -204,51 +278,41 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
                     .fallback(R.drawable.sad_face)
                     .crossFade()
                     .centerCrop()
-                    .into(h.getThumbnail());
-        }
-    }
-
-    class DetailsHolder extends RecyclerView.ViewHolder {
-        private TextView mTitleTextView;
-        private TextView mDateTextView;
-        private TextView mRatingTextView;
-        private ImageButton mFavoriteButton;
-        private TextView mPlotTextView;
-        private ImageView mThumbnail;
-
-        public DetailsHolder(View v) {
-            super(v);
-            mTitleTextView = (TextView) v.findViewById(R.id.fragment_details_title_text_view);
-            mDateTextView = (TextView) v.findViewById(R.id.fragment_details_date_text_view);
-            mRatingTextView = (TextView) v.findViewById(R.id.fragment_details_rating_text_view);
-            mFavoriteButton = (ImageButton) v.findViewById(
-                    R.id.fragment_details_favorite_image_button);
-            mPlotTextView = (TextView) v.findViewById(R.id.fragment_details_plot_text_view);
-            mThumbnail = (ImageView) v.findViewById(R.id.fragment_details_thubnail_image_view);
+                    .into(mThumbnail);
         }
 
-        public TextView getDateTextView() {
-            return mDateTextView;
+        @Override
+        public void onClick(View v) {
+            mFavorite = !mFavorite;
+            setFavoriteImage();
         }
 
-        public ImageButton getFavoriteButton() {
-            return mFavoriteButton;
+        @Override
+        public Loader onCreateLoader(int id, Bundle args) {
+            switch(id){
+                case LOADER_FAVORITES:
+                case LOADER_REVIEWS:
+                case LOADER_TRAILERS:
+            }
+            return null;
         }
 
-        public TextView getPlotTextView() {
-            return mPlotTextView;
+        @Override
+        public void onLoaderReset(Loader loader) {
+            switch(loader.getId()){
+                case LOADER_FAVORITES:
+                case LOADER_REVIEWS:
+                case LOADER_TRAILERS:
+            }
         }
 
-        public TextView getRatingTextView() {
-            return mRatingTextView;
-        }
-
-        public ImageView getThumbnail() {
-            return mThumbnail;
-        }
-
-        public TextView getTitleTextView() {
-            return mTitleTextView;
+        @Override
+        public void onLoadFinished(Loader loader, Object data) {
+            switch(loader.getId()){
+                case LOADER_FAVORITES:
+                case LOADER_REVIEWS:
+                case LOADER_TRAILERS:
+            }
         }
     }
 }

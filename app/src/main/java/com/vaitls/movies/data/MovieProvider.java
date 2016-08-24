@@ -1,20 +1,16 @@
 package com.vaitls.movies.data;
 
 import android.content.ContentProvider;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.SQLException;
-import android.database.sqlite.SQLiteCursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
-import android.os.Parcel;
 import android.support.annotation.Nullable;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import static com.vaitls.movies.data.Contract.Favorites;
 import static com.vaitls.movies.data.Contract.TopRated;
@@ -61,6 +57,10 @@ public class MovieProvider extends ContentProvider {
         final String ITEM = "item/vnd.com.vaitls.movies.";
         final String DIR = "dir/vnd.com.vaitls.movies.";
         switch (uriMatcher.match(uri)) {
+            case Contract.M_META:
+                stringBuilder.append(ITEM);
+                stringBuilder.append(Contract.META);
+                break;
             case Contract.M_FAVORITE:
                 stringBuilder.append(ITEM);
                 stringBuilder.append(Contract.FAVORITES);
@@ -86,11 +86,11 @@ public class MovieProvider extends ContentProvider {
                 break;
             case Contract.M_TOPRATED:
                 stringBuilder.append(ITEM);
-                stringBuilder.append(Contract.TOP_RATED);
+                stringBuilder.append(Contract.TOPRATED);
                 break;
             case Contract.M_TOPRATED_DIR:
                 stringBuilder.append(DIR);
-                stringBuilder.append(Contract.TOP_RATED);
+                stringBuilder.append(Contract.TOPRATED);
                 break;
             default:
                 throw new IllegalArgumentException("unknown query " + uri);
@@ -104,23 +104,27 @@ public class MovieProvider extends ContentProvider {
         long rowID = -1;
         Uri.Builder retBuilder = Contract.BASE_CONTENT_URI.buildUpon();
         switch (uriMatcher.match(uri)) {
-            case Contract.M_FAVORITE:
+            case Contract.M_META:
+                rowID=db.insert(Contract.META, null, values);
+                retBuilder.appendEncodedPath(Contract.META);
+                break;
+            case Contract.M_FAVORITES_DIR:
                 rowID = db.insert(Contract.FAVORITES, null, values);
                 retBuilder.appendEncodedPath(Contract.FAVORITES);
                 break;
-            case Contract.M_TOPRATED:
-                rowID = db.insert(Contract.TOP_RATED, null, values);
-                retBuilder.appendEncodedPath(Contract.TOP_RATED);
+            case Contract.M_TOPRATED_DIR:
+                rowID = db.insert(Contract.TOPRATED, null, values);
+                retBuilder.appendEncodedPath(Contract.TOPRATED);
                 break;
-            case Contract.M_MOVIE:
+            case Contract.M_MOVIES_DIR:
                 rowID = db.insert(Contract.MOVIE, null, values);
                 retBuilder.appendEncodedPath(Contract.MOVIE);
                 break;
-            case Contract.M_POPULAR:
+            case Contract.M_POPULAR_DIR:
                 rowID = db.insert(Contract.POPULAR, null, values);
                 retBuilder.appendEncodedPath(Contract.POPULAR);
                 break;
-            case Contract.M_REVIEW:
+            case Contract.M_REVIEWS_DIR:
                 rowID = db.insert(Contract.MOVIE, null, values);
                 retBuilder.appendEncodedPath(Contract.MOVIE);
                 break;
@@ -128,7 +132,7 @@ public class MovieProvider extends ContentProvider {
                 throw new IllegalArgumentException("Insert URI" + uri);
         }
         if (rowID < 0) {
-            throw new SQLException("insertion failed" + uri);
+            throw new SQLException("insertion failed: " + uri);
         }
         retBuilder.appendEncodedPath(String.valueOf(rowID));
         Uri rUri = retBuilder.build();
@@ -147,7 +151,7 @@ public class MovieProvider extends ContentProvider {
         favoritesProjectionMap.put(Favorites.COL_TITLE, "movies.title");
         favoritesProjectionMap.put(Favorites.COL_PLOT, "movies.plot");
         favoritesProjectionMap.put(Favorites.COL_POSTER_PATH,"movies.poster_path");
-        favoritesProjectionMap.put(Favorites.COL_RELEASE_DATE,"moves.release_date");
+        favoritesProjectionMap.put(Favorites.COL_RELEASE_DATE,"movies.release_date");
         favoritesProjectionMap.put(Favorites.COL_VOTE_AVERAGE, "movies.vote_average");
         favoritesProjectionMap.put(Favorites.COL_FAVORITE, "favorites.favorite");
 
@@ -188,6 +192,9 @@ public class MovieProvider extends ContentProvider {
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
 
         switch (uriMatcher.match(uri)) {
+            case Contract.M_META:
+                qb.setTables("meta");
+                break;
             case Contract.M_FAVORITES_DIR:
                 qb.setTables("movies inner join favorites on movies.mid=favorites.mid");
                 qb.setProjectionMap(favoritesProjectionMap);
@@ -222,7 +229,8 @@ public class MovieProvider extends ContentProvider {
                 throw new IllegalArgumentException("unhandled URI"+uri);
         }
         Cursor c=qb.query(db,projection,selection,selectionArgs,null,null,sortOrder);
-        return null;
+        c.setNotificationUri(getContext().getContentResolver(),uri);
+        return c;
     }
 
     /**

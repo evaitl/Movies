@@ -82,19 +82,12 @@ public abstract class RecyclerViewCursorAdapter<VH extends RecyclerView.ViewHold
     }
 
 
-    @Override
-    public void setHasStableIds(boolean hasStableIds) {
-        throw new IllegalStateException("This is automatically set from cursor _id.");
-        //super.setHasStableIds(hasStableIds);
-    }
-
     /**
      * Swap in a new Cursor, returning the old Cursor.  Unlike
      * {@link #changeCursor(Cursor)}, the returned old Cursor is <em>not</em>
      * closed.
      */
     public Cursor swapCursor(Cursor newCursor) {
-        Log.d(TAG, "swapCursor to "+newCursor);
         if (newCursor == mCursor) {
             return null;
         }
@@ -110,15 +103,6 @@ public abstract class RecyclerViewCursorAdapter<VH extends RecyclerView.ViewHold
             int oldRowIdColmun=mRowIdColumn;
             mRowIdColumn = newCursor.getColumnIndex("_id");
 
-            /*
-              This will throw an exception if we start with a cursor with an _id column,
-              register observers, then change to a cursor without an _id column.
-
-              Don't do that.
-             */
-            if(hasStableIds() != (mRowIdColumn!=-1)){
-                super.setHasStableIds(mRowIdColumn!=-1);
-            }
 
             mDataValid = true;
             notifyDataSetChanged();

@@ -21,7 +21,6 @@ import com.vaitls.movies.R;
 import com.vaitls.movies.data.Contract;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.Date;
 
 import retrofit2.Call;
@@ -45,8 +44,9 @@ import static java.lang.Math.min;
  */
 public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String TAG = MoviesSyncAdapter.class.getSimpleName();
-    private static final int PRECACHE_PAGES = 20;
-    private static final int MAX_PAGE = 100;
+    private static final int PRECACHE_PAGES = 10;
+    // TODO 100
+    private static final int MAX_PAGE = 10;
     // Every 6 hours.
     private static final int SYNC_INTERVAL = 60 * 60 * 6;
     // More or less....
@@ -175,12 +175,16 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
 
     private void getDbMeta() {
         Cursor meta = mContentResolver.query(Contract.META_URI,
-                META_PROJECTION, null, null, null);
-        lastPopPage = meta.getInt(0);
-        lastTrPage = meta.getInt(1);
-        maxPopPage = meta.getInt(2);
-        maxTrPage = meta.getInt(3);
-
+                                             META_PROJECTION, null, null, null);
+        if (meta != null && meta.getCount()>0){
+            meta.moveToFirst();
+            lastPopPage = meta.getInt(0);
+            lastTrPage = meta.getInt(1);
+            maxPopPage = meta.getInt(2);
+            maxTrPage = meta.getInt(3);
+        }else{
+            maxPopPage=maxTrPage=MAX_PAGE;
+        }
         /*
         TODO: put max cached in settings. These are about 2000.
          */
@@ -198,7 +202,16 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void saveMi(MovieInfo mi, MovieListType type, long expires, int rank) {
+        if(!mi.isGoodData()){
+            /*
+            Apparently some of the movie info in the lists is
+            incomplete. This causes SQLiteConstraintExceptions.
+             */
+            Log.i(TAG,"skipping movie store: "+mi.getTitle());
+            return;
+        }
         ContentValues movieValues=new ContentValues();
+
         movieValues.put(Movies.COL_MID, mi.getId());
         movieValues.put(Movies.COL_RELEASE_DATE , mi.getRelease_date());
         movieValues.put(Movies.COL_PLOT , mi.getOverview());
@@ -206,6 +219,7 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
         movieValues.put(Movies.COL_TITLE , mi.getTitle());
         movieValues.put(Movies.COL_VOTE_AVERAGE, mi.getVote_average());
         movieValues.put(Movies.COL_VOTE_COUNT, mi.getVote_count());
+
         mContentResolver.insert(Contract.MOVIE_INFO_URI,movieValues);
 
         ContentValues listValues = new ContentValues();
@@ -219,8 +233,6 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
             uri = Contract.TOP_RATED_URI;
         }
         mContentResolver.insert(uri, listValues);
-
-
     }
 
     /**
@@ -245,10 +257,11 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
         try {
             int nextPopPage = lastPopPage % maxPopPage + 1;
             for (int i = 0; i < PRECACHE_PAGES; ++i) {
+
                 if (nextPopPage == 0) {
                     nextPopPage = 1;
                 }
-
+                Log.d(TAG,"pop page "+nextPopPage);
                 Response<MoviePage> rp =
                         MovieApi.retrofit.create(MovieApi.class)
                                 .getPage(MovieListType.POPULAR.toString(), sApiKey, nextPopPage)
@@ -278,9 +291,10 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
                 if (nextTRPage == 0) {
                     nextTRPage = 1;
                 }
+                Log.d(TAG,"tr page "+ nextTRPage);
                 Response<MoviePage> rp =
                         MovieApi.retrofit.create(MovieApi.class)
-                                .getPage(MovieListType.TOP_RATED.toString(), sApiKey, nextTRPage)
+                                .getPage(MovieListType.TOPRATED.toString(), sApiKey, nextTRPage)
                                 .execute();
                 if (!rp.isSuccessful()) {
                     Log.i(TAG, "Failed fetching TR page " + nextTRPage);
@@ -298,7 +312,7 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
                 // Assumes each page has the same number of movies.
                 int rank = 1 + (moviePage.getTotal_results() * (nextTRPage - 1));
                 for (MovieInfo mi : moviePage.getResults()) {
-                    saveMi(mi, MovieListType.TOP_RATED, expires, rank++);
+                    saveMi(mi, MovieListType.TOPRATED, expires, rank++);
                 }
                 lastTrPage = nextTRPage++;
             }
