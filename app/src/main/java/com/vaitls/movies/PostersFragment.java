@@ -32,8 +32,8 @@ import static com.vaitls.movies.data.Contract.Movies;
 public class PostersFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final String TAG = PostersFragment.class.getSimpleName();
     private final static String[] PROJECTION = {
-            Movies.COL__ID,
-            Movies.COL_POSTER_PATH,
+        Movies.COLS._ID,
+        Movies.COLS.POSTER_PATH,
     };
     private static final int COL__ID=0;
     private static final int COL_POSTER_PATH=1;
@@ -82,11 +82,11 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Uri uri = null;
         if (id == MovieListType.FAVORITE.ordinal()) {
-            uri = Contract.FAVORITES_URI;
+            uri = Contract.Favorites.URI;
         } else if (id == MovieListType.POPULAR.ordinal()) {
-            uri = Contract.POPULAR_URI;
+            uri = Contract.Popular.URI;
         } else if (id == MovieListType.TOPRATED.ordinal()) {
-            uri = Contract.TOP_RATED_URI;
+            uri = Contract.TopRated.URI;
         } else {
             throw new IllegalStateException("unknown loader id " + id);
         }
