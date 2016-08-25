@@ -79,8 +79,8 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
+        Log.d(TAG,"olr");
         mDetailsAdapter.swapCursor(null);
-
     }
 
     /**
@@ -94,6 +94,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
      * Do this in an asynctask. No db in UI thread.
      */
     private void preenFavorites(){
+        Log.d(TAG,"preening Favorits");
         new AsyncTask<Void,Void,Void>(){
             @Override
             protected Void doInBackground(Void... params) {
@@ -113,6 +114,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        Log.d(TAG,"olf");
         mDetailsAdapter.swapCursor(data);
         setIndex(mIndex);
     }
@@ -124,6 +126,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             }
             mSearchOrder = searchOrder;
             mIndex = 0;
+            Log.d(TAG,"init loader this-- setSearchOrder");
             getLoaderManager().initLoader(mSearchOrder.ordinal(), null, this);
         }
     }
@@ -157,6 +160,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
         }
         mIndex = bundle.getInt(ARG_IDX, 0);
         mDetailsAdapter = new DetailsAdapter(getContext(), null);
+        Log.d(TAG,"initLoader this -- onCreate");
         getLoaderManager().initLoader(mSearchOrder.ordinal(), null, this);
         Log.d(TAG, "df onCreate");
     }
@@ -170,6 +174,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
 
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            Log.d(TAG,"ossc: "+ newState+ "mSettling " +mSettling);
             LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
             if (!mSettling && newState == RecyclerView.SCROLL_STATE_IDLE) {
 
@@ -242,6 +247,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
         private ImageButton mFavoriteButton;
         private TextView mPlotTextView;
         private ImageView mThumbnail;
+        private TextView mGenresTextView;
         private int mMid;
         private boolean mFavorite;
 
@@ -255,6 +261,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             mFavoriteButton.setOnClickListener(this);
             mPlotTextView = (TextView) v.findViewById(R.id.fragment_details_plot_text_view);
             mThumbnail = (ImageView) v.findViewById(R.id.fragment_details_thubnail_image_view);
+            mGenresTextView=(TextView)v.findViewById(R.id.fragment_details_genre_text_view);
         }
 
 
@@ -264,11 +271,14 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
          * @param set
          */
         private void setFavoriteImage(final int mid, final boolean set) {
-            mFavorite=set;
             mFavoriteButton.setImageDrawable(
                 ContextCompat.getDrawable(getContext(),
                                           set ? R.drawable.ic_gold_star
                                               : R.drawable.ic_black_star));
+            if(mFavorite==set){
+                return;
+            }
+            mFavorite=set;
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
@@ -308,7 +318,10 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             mRatingTextView.setText(String.format("%.2f",
                                                   cursor.getFloat(Favorites.IDX.VOTE_AVERAGE)));
             mTitleTextView.setText(cursor.getString(Favorites.IDX.TITLE));
+            mGenresTextView.setText(GenreNameMapper.map(cursor.getString(Favorites.IDX.GENRES)));
             setFavoriteImage(mMid,mFavorite);
+
+
             String uri = "http://image.tmdb.org/t/p/w185" +
                 cursor.getString(Favorites.IDX.POSTER_PATH);
             /**
@@ -327,8 +340,8 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
 
         @Override
         public void onClick(View v) {
-            mFavorite = !mFavorite;
-            setFavoriteImage(mMid,mFavorite);
+            Log.d(TAG, "clicked");
+            setFavoriteImage(mMid,!mFavorite);
         }
 
 

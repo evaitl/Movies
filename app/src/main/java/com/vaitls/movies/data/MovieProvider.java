@@ -10,6 +10,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +31,7 @@ import static com.vaitls.movies.data.Contract.MatcherIdxs;
  *
  */
 public class MovieProvider extends ContentProvider {
+    private static final String TAG=MovieProvider.class.getSimpleName();
     private MovieDBHelper mMovieDBHelper;
     private SQLiteDatabase db;
     private UriMatcher uriMatcher;
@@ -49,10 +51,12 @@ public class MovieProvider extends ContentProvider {
      */
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
+        Log.d(TAG,"delete "+uri);
         int rowsDeleted=0;
         switch (uriMatcher.match(uri)){
             case MatcherIdxs.FAVORITES:
                 rowsDeleted= db.delete(Contract.TableNames.FAVORITES,selection,selectionArgs);
+                getContext().getContentResolver().notifyChange(Contract.Favorites.URI,null);
                 break;
             default:
                 throw new UnsupportedOperationException("No deletes supported: "+uri);
@@ -103,6 +107,7 @@ public class MovieProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(Uri uri, ContentValues values) {
+        Log.d(TAG, "insert "+uri);
         long rowID = -1;
         ContentResolver contentResolver=getContext().getContentResolver();
         Uri.Builder retBuilder = Contract.BASE_CONTENT_URI.buildUpon();
@@ -111,30 +116,38 @@ public class MovieProvider extends ContentProvider {
                 rowID=db.insert(Contract.TableNames.MOVIES, null, values);
                 contentResolver.notifyChange(Contract.Movies.URI,null);
                 // These three are joined to movies on a query
-                contentResolver.notifyChange(Contract.Favorites.URI,null);
-                contentResolver.notifyChange(Contract.TopRated.URI,null);
-                contentResolver.notifyChange(Contract.Popular.URI,null);
+                contentResolver.notifyChange(Favorites.URI,null);
+                contentResolver.notifyChange(TopRated.URI,null);
+                contentResolver.notifyChange(Popular.URI,null);
                 break;
             case Contract.MatcherIdxs.FAVORITES :
                 rowID=db.insert(Contract.TableNames.FAVORITES, null, values);
+                contentResolver.notifyChange(Favorites.URI,null);
+                // Really should notify TR and Pop here, but they can't see in this app.
+                // Don't trigger more work than necessary.
                 break;
             case Contract.MatcherIdxs.META :
                 rowID=db.insert(Contract.TableNames.META, null, values);
                 break;
             case Contract.MatcherIdxs.GENRE_NAMES :
                 rowID=db.insert(Contract.TableNames.GENRE_NAMES, null, values);
+                contentResolver.notifyChange(GenreNames.URI,null);
                 break;
             case Contract.MatcherIdxs.TOPRATED :
                 rowID=db.insert(Contract.TableNames.TOPRATED, null, values);
+                contentResolver.notifyChange(TopRated.URI,null);
                 break;
             case Contract.MatcherIdxs.POPULAR :
                 rowID=db.insert(Contract.TableNames.POPULAR, null, values);
+                contentResolver.notifyChange(Popular.URI,null);
                 break;
             case Contract.MatcherIdxs.VIDEOS :
                 rowID=db.insert(Contract.TableNames.VIDEOS, null, values);
+                contentResolver.notifyChange(Videos.URI,null);
                 break;
             case Contract.MatcherIdxs.REVIEWS :
                 rowID=db.insert(Contract.TableNames.REVIEWS, null, values);
+                contentResolver.notifyChange(Reviews.URI,null);
                 break;
             default:
                 throw new IllegalArgumentException("Insert URI" + uri);
@@ -226,18 +239,27 @@ public class MovieProvider extends ContentProvider {
             case MatcherIdxs.FAVORITES:
                 qb.setProjectionMap(favoritesProjectionMap);
                 qb.setTables("movies inner join favorites on movies.mid=favorites.mid");
+                if(sortOrder==null){
+                    sortOrder="title collate nocase asc";
+                }
                 break;
             case MatcherIdxs.TOPRATED:
                 qb.setProjectionMap(topRatedProjectionMap);
                 qb.setTables(
                     "movies left join favorites on movies.mid=favorites.mid "+
                     "inner join toprated on movies.mid=toprated.mid");
+                if(sortOrder==null){
+                    sortOrder="rank asc";
+                }
                 break;
             case MatcherIdxs.POPULAR:
                 qb.setProjectionMap(popularProjectionMap);
                 qb.setTables(
                     "movies left join favorites on movies.mid=favorites.mid "+
                     "inner join popular on movies.mid=popular.mid");
+                if(sortOrder==null){
+                    sortOrder="rank asc";
+                }
                 break;
             default:
                 throw new IllegalArgumentException("unhandled URI"+uri);

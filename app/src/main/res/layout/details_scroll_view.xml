@@ -99,12 +99,23 @@
                 android:paddingLeft="@dimen/detail_image_padding"
                 tools:src="@mipmap/ic_launcher"/>
         </LinearLayout>
-
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left"
+            android:text="@string/genres_label"
+            />
+        <TextView
+            android:id="@+id/fragment_details_genre_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="War, Western, Drama, Black Comedy"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="left"
             android:text="@string/plot_label"
+            android:paddingTop="5dp"
             />
 
         <TextView

@@ -105,6 +105,7 @@ public class MovieActivity extends AppCompatActivity {
                         .commit();
             }
         }
+        GenreNameMapper.loadGenres(this);
     }
 
     @Override

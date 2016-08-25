@@ -9,6 +9,7 @@ import android.util.Log;
 import com.vaitls.movies.data.Contract;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -35,21 +36,39 @@ import retrofit2.http.Query;
  *
  * TODO: refresh the genre names table based on the Expires header.
  */
-public class GenreNameMapper {
+public final class GenreNameMapper {
     private static final String TAG = GenreNameMapper.class.getSimpleName();
-    static Map<Integer, String> mNames;
-    private static Object lock = new Object();
+    private static Map<Integer, String> sNames=new HashMap<>();
+
+    // Don't make these.
+    private GenreNameMapper(){}
 
     static void loadGenres(Context context) {
         new GenreLoader(context).execute();
     }
 
     static String lookup(Integer a) {
-        String value = mNames.get(a);
+        String value = sNames.get(a);
         if (value == null) {
             value = a.toString();
         }
         return value;
+    }
+    static String map(String ids){
+        String []tokens=ids.split("[^0-9]");
+        StringBuilder sb=new StringBuilder(35);
+        boolean first=true;
+        for(String s:tokens){
+            if(s.equals("")){
+                continue;
+            }
+            if(!first) {
+                sb.append(", ");
+            }
+            first=false;
+            sb.append(lookup(Integer.parseInt(s)));
+        }
+        return sb.toString();
     }
 
     private interface GenreApi {
@@ -59,7 +78,14 @@ public class GenreNameMapper {
             .build();
 
         @GET("genre/movie/list")
-        Call<GenreName[]> getGenreNames(@Query("api_key") String sApiKey);
+        Call<GenreNames> getGenreNames(@Query("api_key") String sApiKey);
+    }
+    private static class GenreNames{
+        GenreName [] genres;
+        private GenreNames(){}
+        public GenreName[] getGenres() {
+            return genres;
+        }
     }
     private static class GenreName {
         private int id;
@@ -132,7 +158,7 @@ public class GenreNameMapper {
             if (cursor != null && cursor.getCount() != 0) {
                 return cursor;
             }
-            Response<GenreName[]> rp = null;
+            Response<GenreNames> rp = null;
             try {
                 rp =
                     GenreApi.retrofit.create(GenreApi.class)
@@ -141,7 +167,7 @@ public class GenreNameMapper {
                 Log.e(TAG, "IOException in retrofit");
             }
             if (rp != null && rp.isSuccessful()) {
-                saveData(rp.body());
+                saveData(rp.body().getGenres());
                 return getGenreNamesCursor();
             }
             if (tries++ < MAX_TRIES) {
@@ -172,7 +198,7 @@ public class GenreNameMapper {
             while (!cursor.isAfterLast()) {
                 Integer gid = cursor.getInt(Contract.GenreNames.IDX.GID);
                 String name = cursor.getString(Contract.GenreNames.IDX.NAME);
-                mNames.put(gid, name);
+                sNames.put(gid, name);
                 cursor.moveToNext();
             }
             cursor.close();

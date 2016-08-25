@@ -75,6 +75,7 @@ public abstract class RecyclerViewCursorAdapter<VH extends RecyclerView.ViewHold
      * closed.
      */
     public void changeCursor(Cursor cursor) {
+        Log.d(TAG,"changeCursor");
         Cursor old = swapCursor(cursor);
         if (old != null) {
             old.close();
@@ -88,6 +89,7 @@ public abstract class RecyclerViewCursorAdapter<VH extends RecyclerView.ViewHold
      * closed.
      */
     public Cursor swapCursor(Cursor newCursor) {
+        Log.d(TAG,"swapCursor");
         if (newCursor == mCursor) {
             return null;
         }
@@ -105,10 +107,12 @@ public abstract class RecyclerViewCursorAdapter<VH extends RecyclerView.ViewHold
 
 
             mDataValid = true;
+            Log.d(TAG,"calling ndsc");
             notifyDataSetChanged();
         } else {
             mRowIdColumn = -1;
             mDataValid = false;
+            Log.d(TAG, "calling ndsc mdv=false;");
             notifyDataSetChanged();
             //There is no notifyDataSetInvalidated() method in RecyclerView.Adapter
         }
@@ -119,11 +123,13 @@ public abstract class RecyclerViewCursorAdapter<VH extends RecyclerView.ViewHold
         @Override
         public void onChanged() {
             mDataValid = true;
+            Log.d(TAG,"NDSO onchanged");
             notifyDataSetChanged();
         }
 
         @Override
         public void onInvalidated() {
+            Log.d(TAG,"NDSO oninvalidated");
             mDataValid = false;
             notifyDataSetChanged();
             //There is no notifyDataSetInvalidated() method in RecyclerView.Adapter
