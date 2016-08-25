@@ -13,6 +13,8 @@ import android.support.annotation.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.vaitls.movies.data.Contract.CONTENT_AUTH;
 import static com.vaitls.movies.data.Contract.Favorites;
 import static com.vaitls.movies.data.Contract.TopRated;
 import static com.vaitls.movies.data.Contract.Popular;
@@ -47,8 +49,15 @@ public class MovieProvider extends ContentProvider {
      */
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-
-        throw new UnsupportedOperationException("No deletes supported: "+uri);
+        int rowsDeleted=0;
+        switch (uriMatcher.match(uri)){
+            case MatcherIdxs.FAVORITES:
+                rowsDeleted= db.delete(Contract.TableNames.FAVORITES,selection,selectionArgs);
+                break;
+            default:
+                throw new UnsupportedOperationException("No deletes supported: "+uri);
+        }
+        return rowsDeleted;
     }
 
     @Nullable

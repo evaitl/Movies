@@ -345,6 +345,10 @@ public final class Contract {
             mValues.put(Favorites.COLS.MID, mid);
             return this;
         }
+        public FavoritesBuilder putFavorite(boolean isFavorite){
+            mValues.put(Favorites.COLS.FAVORITE, isFavorite);
+            return this;
+        }
     }
 
     public static class TopRatedBuilder extends Builder {

@@ -15,8 +15,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -35,8 +33,8 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
         Movies.COLS._ID,
         Movies.COLS.POSTER_PATH,
     };
-    private static final int COL__ID=0;
-    private static final int COL_POSTER_PATH=1;
+    private static final int COL__ID = 0;
+    private static final int COL_POSTER_PATH = 1;
     private PhotoAdapter mPhotoAdapter;
     private MovieListType mSearchOrder;
     private RecyclerView mPostersRecylerView;
@@ -48,15 +46,10 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
     void setSearchOrder(MovieListType searchOrder) {
         if (mSearchOrder != searchOrder) {
             mSearchOrder = searchOrder;
-            getLoaderManager().initLoader(mSearchOrder.ordinal(),null,this);
+            getLoaderManager().initLoader(mSearchOrder.ordinal(), null, this);
         }
     }
 
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.fragment_posters, menu);
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -71,7 +64,7 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
         View v = inflater.inflate(R.layout.recycler_view, container, false);
         mPostersRecylerView = (RecyclerView) v.findViewById(R.id.full_page_recycler_view);
         int columns = getResources().getInteger(R.integer.columns);
-        Log.d(TAG, "setting adapter to "+mPhotoAdapter);
+        Log.d(TAG, "setting adapter to " + mPhotoAdapter);
         mPostersRecylerView.setAdapter(mPhotoAdapter);
         mPostersRecylerView.setLayoutManager(new GridLayoutManager(getActivity(), columns));
         mPostersRecylerView.setHasFixedSize(true);
@@ -117,7 +110,7 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
 
     private boolean isOnline() {
         ConnectivityManager cm =
-                (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
         return netInfo != null && netInfo.isConnectedOrConnecting();
     }
@@ -155,13 +148,13 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
         void bindImageInfo(String posterPath) {
             String uri = "http://image.tmdb.org/t/p/w185" + posterPath;
             Glide.with(getContext())
-                    .load(uri)
-                    .placeholder(R.mipmap.ic_launcher)
-                    .error(R.drawable.sad_face)
-                    .fallback(R.drawable.sad_face)
-                    .crossFade()
-                    .centerCrop()
-                    .into(mImageView);
+                .load(uri)
+                .placeholder(R.mipmap.ic_launcher)
+                .error(R.drawable.sad_face)
+                .fallback(R.drawable.sad_face)
+                .crossFade()
+                .centerCrop()
+                .into(mImageView);
         }
 
         @Override

@@ -1,8 +1,10 @@
 package com.vaitls.movies;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -59,16 +61,16 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Uri uri = null;
-        String [] PROJECTION=null;
+        String[] PROJECTION = null;
         if (id == MovieListType.FAVORITE.ordinal()) {
             uri = Favorites.URI;
-            PROJECTION=Favorites.PROJECTION;
+            PROJECTION = Favorites.PROJECTION;
         } else if (id == MovieListType.POPULAR.ordinal()) {
             uri = Contract.Popular.URI;
-            PROJECTION= Contract.Popular.PROJECTION;
+            PROJECTION = Contract.Popular.PROJECTION;
         } else if (id == MovieListType.TOPRATED.ordinal()) {
             uri = Contract.TopRated.URI;
-            PROJECTION=Contract.TopRated.PROJECTION;
+            PROJECTION = Contract.TopRated.PROJECTION;
         } else {
             throw new IllegalStateException("unknown loader id " + id);
         }
@@ -81,6 +83,34 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
 
     }
 
+    /**
+     * When I'm browsing the favorites list, I hate having the view I'm looking at
+     * disappear as soon as I touch the star. Instead, we turn off the star
+     * by setting favorite to false and put that in the db.
+     *
+     * In onPause or when changing away from the favorite list, I preen out the
+     * no-longer favorites from the favorites list.
+     *
+     * Do this in an asynctask. No db in UI thread.
+     */
+    private void preenFavorites(){
+        new AsyncTask<Void,Void,Void>(){
+            @Override
+            protected Void doInBackground(Void... params) {
+                getContext().getContentResolver().delete(Favorites.URI,"favorite = 0",null);
+                return null;
+            }
+        }.execute();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(mSearchOrder==MovieListType.FAVORITE){
+            preenFavorites();
+        }
+    }
+
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mDetailsAdapter.swapCursor(data);
@@ -89,6 +119,9 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
 
     void setSearchOrder(MovieListType searchOrder) {
         if (mSearchOrder != searchOrder) {
+            if(mSearchOrder==MovieListType.FAVORITE){
+                preenFavorites();
+            }
             mSearchOrder = searchOrder;
             mIndex = 0;
             getLoaderManager().initLoader(mSearchOrder.ordinal(), null, this);
@@ -157,13 +190,14 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
                  *     you probably want to use adapter positions.
                  * </blockquote>
                  */
-                DetailsHolder h=(DetailsHolder) recyclerView.findViewHolderForLayoutPosition(mIndex);
-                if(h!=null){
+                DetailsHolder h = (DetailsHolder) recyclerView.findViewHolderForLayoutPosition(
+                    mIndex);
+                if (h != null) {
                     h.loadTrailers();
                 }
             }
             if (newState == RecyclerView.SCROLL_STATE_DRAGGING ||
-                    newState == RecyclerView.SCROLL_STATE_SETTLING) {
+                newState == RecyclerView.SCROLL_STATE_SETTLING) {
                 mSettling = false;
             }
         }
@@ -180,38 +214,28 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
         public DetailsHolder onCreateViewHolder(ViewGroup parent, int viewType) {
             Context context = parent.getContext();
             View v = LayoutInflater.from(context)
-                    .inflate(R.layout.details_scroll_view, parent, false);
+                .inflate(R.layout.details_scroll_view, parent, false);
             return new DetailsHolder(v);
         }
 
         @Override
         public void onBindViewHolder(DetailsHolder h, Cursor cursor) {
             h.bind(cursor);
-
         }
 
         @Override
         public void onViewDetachedFromWindow(DetailsHolder holder) {
             super.onViewDetachedFromWindow(holder);
+            holder.cancelLoaders();
         }
 
-        /**
-         * Possible cancel any trailer loads here?
-         * @param holder
-         */
-        @Override
-        public void onViewRecycled(DetailsHolder holder) {
-            super.onViewRecycled(holder);
-        }
     }
 
-    class DetailsHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
-        private final int LOADER_FAVORITES=1;
-        private final int LOADER_REVIEWS=2;
-        private final int LOADER_TRAILERS=3;
-        private Loader mFavoritesLoader;
-        private Loader mReviewsLoader;
-        private Loader mTrailersLoader;
+
+    class DetailsHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        private final int LOADER_FAVORITES = 1;
+        private final int LOADER_REVIEWS = 2;
+        private final int LOADER_TRAILERS = 3;
         private TextView mTitleTextView;
         private TextView mDateTextView;
         private TextView mRatingTextView;
@@ -220,81 +244,91 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
         private ImageView mThumbnail;
         private int mMid;
         private boolean mFavorite;
+
         public DetailsHolder(View v) {
             super(v);
             mTitleTextView = (TextView) v.findViewById(R.id.fragment_details_title_text_view);
             mDateTextView = (TextView) v.findViewById(R.id.fragment_details_date_text_view);
             mRatingTextView = (TextView) v.findViewById(R.id.fragment_details_rating_text_view);
             mFavoriteButton = (ImageButton) v.findViewById(
-                    R.id.fragment_details_favorite_image_button);
+                R.id.fragment_details_favorite_image_button);
             mFavoriteButton.setOnClickListener(this);
             mPlotTextView = (TextView) v.findViewById(R.id.fragment_details_plot_text_view);
             mThumbnail = (ImageView) v.findViewById(R.id.fragment_details_thubnail_image_view);
         }
-        private void setFavoriteImage(){
+
+
+        /**
+         * Sets the favorite image and updates the database with an insert.
+         * @param mid
+         * @param set
+         */
+        private void setFavoriteImage(final int mid, final boolean set) {
+            mFavorite=set;
             mFavoriteButton.setImageDrawable(
-                    ContextCompat.getDrawable(getContext(),
-                                              mFavorite ? R.drawable.ic_gold_star
-                                                      : R.drawable.ic_black_star));
+                ContextCompat.getDrawable(getContext(),
+                                          set ? R.drawable.ic_gold_star
+                                              : R.drawable.ic_black_star));
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... params) {
+                    ContentResolver resolver = getContext().getContentResolver();
+                    resolver.insert(Favorites.URI, Contract.buildFavorites()
+                        .putMid(mid)
+                        .putFavorite(set)
+                        .build());
+                    return null;
+                }
+            }.execute();
         }
 
         /**
          * Called to set the trailers and reviews.
          */
-        void loadTrailers(){
+        void loadTrailers() {
 
         }
+
         /*
 
          */
-        private void clearOldLoaders(){
-            if(mFavoritesLoader!=null){
-                mFavoritesLoader.cancelLoad();
-                mFavoritesLoader=null;
-            }
-            if(mTrailersLoader!=null){
-                mTrailersLoader.cancelLoad();
-                mTrailersLoader=null;
-            }
-            if(mReviewsLoader!=null){
-                mReviewsLoader.cancelLoad();
-                mReviewsLoader=null;
-            }
+        private void cancelLoaders() {
+
         }
+
         void bind(Cursor cursor) {
-            clearOldLoaders();
             /**
-                Counting on using the contract projections and
+             Counting on using the contract projections and
              the colmuns are stable between tables (TopRated.IDX.RANK==Popular.IDX.RANK).
              */
-            mFavorite=cursor.getInt(Favorites.IDX.FAVORITE)==1;
+            mFavorite = cursor.getInt(Favorites.IDX.FAVORITE) == 1;
             mMid = cursor.getInt(Favorites.IDX.MID);
             mDateTextView.setText(cursor.getString(Favorites.IDX.RELEASE_DATE));
             mPlotTextView.setText(cursor.getString(Favorites.IDX.PLOT));
             mRatingTextView.setText(String.format("%.2f",
                                                   cursor.getFloat(Favorites.IDX.VOTE_AVERAGE)));
             mTitleTextView.setText(cursor.getString(Favorites.IDX.TITLE));
-            setFavoriteImage();
+            setFavoriteImage(mMid,mFavorite);
             String uri = "http://image.tmdb.org/t/p/w185" +
-                    cursor.getString(Favorites.IDX.POSTER_PATH);
+                cursor.getString(Favorites.IDX.POSTER_PATH);
             /**
              * Decided to not cache images/videos in the db. My plex server DB is 12GB,
              * which would kill my cell phone. Glide/Picasso do some local caching I think.
              */
             Glide.with(getContext())
-                    .load(uri)
-                    .placeholder(R.mipmap.ic_launcher)
-                    .error(R.drawable.sad_face)
-                    .fallback(R.drawable.sad_face)
-                    .crossFade()
-                    .centerCrop()
-                    .into(mThumbnail);
+                .load(uri)
+                .placeholder(R.mipmap.ic_launcher)
+                .error(R.drawable.sad_face)
+                .fallback(R.drawable.sad_face)
+                .crossFade()
+                .centerCrop()
+                .into(mThumbnail);
         }
 
         @Override
         public void onClick(View v) {
             mFavorite = !mFavorite;
-            setFavoriteImage();
+            setFavoriteImage(mMid,mFavorite);
         }
 
 
