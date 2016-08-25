@@ -173,6 +173,9 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
         }else{
             maxPopPage=maxTrPage=MAX_PAGE;
         }
+        if(meta!=null){
+            meta.close();
+        }
         /*
         TODO: put max cached in settings. These are about 2000.
          */

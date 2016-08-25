@@ -1,6 +1,7 @@
 package com.vaitls.movies.data;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
@@ -94,10 +95,16 @@ public class MovieProvider extends ContentProvider {
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         long rowID = -1;
+        ContentResolver contentResolver=getContext().getContentResolver();
         Uri.Builder retBuilder = Contract.BASE_CONTENT_URI.buildUpon();
         switch (uriMatcher.match(uri)) {
             case Contract.MatcherIdxs.MOVIES :
                 rowID=db.insert(Contract.TableNames.MOVIES, null, values);
+                contentResolver.notifyChange(Contract.Movies.URI,null);
+                // These three are joined to movies on a query
+                contentResolver.notifyChange(Contract.Favorites.URI,null);
+                contentResolver.notifyChange(Contract.TopRated.URI,null);
+                contentResolver.notifyChange(Contract.Popular.URI,null);
                 break;
             case Contract.MatcherIdxs.FAVORITES :
                 rowID=db.insert(Contract.TableNames.FAVORITES, null, values);
@@ -128,7 +135,7 @@ public class MovieProvider extends ContentProvider {
         }
         retBuilder.appendEncodedPath(String.valueOf(rowID));
         Uri rUri = retBuilder.build();
-        getContext().getContentResolver().notifyChange(rUri, null);
+        contentResolver.notifyChange(rUri, null);
         return rUri;
     }
 
@@ -194,7 +201,6 @@ public class MovieProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-
         switch (uriMatcher.match(uri)) {
             case MatcherIdxs.GENRE_NAMES:
                 qb.setTables(Contract.TableNames.GENRE_NAMES);
@@ -228,7 +234,6 @@ public class MovieProvider extends ContentProvider {
                 throw new IllegalArgumentException("unhandled URI"+uri);
         }
         Cursor c=qb.query(db,projection,selection,selectionArgs,null,null,sortOrder);
-        // TODO: Should set for all tables in the join?
         c.setNotificationUri(getContext().getContentResolver(),uri);
         return c;
     }
