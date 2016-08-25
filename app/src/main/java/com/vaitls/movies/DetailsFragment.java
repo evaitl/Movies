@@ -40,24 +40,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
     private static final String TAG = DetailsFragment.class.getSimpleName();
     private static final String ARG_IDX = "four score and seven";
     private static final String ARG_SO = "years ago our ...";
-    private static final String[] PROJECTION = {
-            Favorites.COL__ID,
-            Favorites.COL_TITLE,
-            Favorites.COL_RELEASE_DATE,
-            Favorites.COL_PLOT,
-            Favorites.COL_POSTER_PATH,
-            Favorites.COL_FAVORITE,
-            Favorites.COL_VOTE_AVERAGE,
-            Favorites.COL_MID,
-    };
-    private static final int COL__ID = 0;
-    private static final int COL_TITLE = 1;
-    private static final int COL_RELEASE_DATE = 2;
-    private static final int COL_PLOT = 3;
-    private static final int COL_POSTER_PATH = 4;
-    private static final int COL_FAVORITE = 5;
-    private static final int COL_VOTE_AVERAGE = 6;
-    private static final int COL_MID = 7;
+
     private MovieListType mSearchOrder;
     private DetailsAdapter mDetailsAdapter;
     private int mIndex;
@@ -76,12 +59,16 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         Uri uri = null;
+        String [] PROJECTION=null;
         if (id == MovieListType.FAVORITE.ordinal()) {
-            uri = Contract.FAVORITES_URI;
+            uri = Favorites.URI;
+            PROJECTION=Favorites.PROJECTION;
         } else if (id == MovieListType.POPULAR.ordinal()) {
-            uri = Contract.POPULAR_URI;
+            uri = Contract.Popular.URI;
+            PROJECTION= Contract.Popular.PROJECTION;
         } else if (id == MovieListType.TOPRATED.ordinal()) {
-            uri = Contract.TOP_RATED_URI;
+            uri = Contract.TopRated.URI;
+            PROJECTION=Contract.TopRated.PROJECTION;
         } else {
             throw new IllegalStateException("unknown loader id " + id);
         }
@@ -161,7 +148,16 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
                 }
                 recyclerView.smoothScrollToPosition(mIndex);
                 mSettling = true;
-                DetailsHolder h=(DetailsHolder) recyclerView.findViewHolderForAdapterPosition(mIndex);
+                /**
+                 * <a href="https://developer.android.com/reference/android/support/v7/widget/RecyclerView.html">
+                 *     RecyclerView</a>
+                 * <blockquote>
+                 *     When writing a RecyclerView.LayoutManager you almost always want
+                 *     to use layout positions whereas when writing an RecyclerView.Adapter,
+                 *     you probably want to use adapter positions.
+                 * </blockquote>
+                 */
+                DetailsHolder h=(DetailsHolder) recyclerView.findViewHolderForLayoutPosition(mIndex);
                 if(h!=null){
                     h.loadTrailers();
                 }
@@ -194,6 +190,11 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
 
         }
 
+        @Override
+        public void onViewDetachedFromWindow(DetailsHolder holder) {
+            super.onViewDetachedFromWindow(holder);
+        }
+
         /**
          * Possible cancel any trailer loads here?
          * @param holder
@@ -204,7 +205,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
         }
     }
 
-    class DetailsHolder extends RecyclerView.ViewHolder implements View.OnClickListener, LoaderManager.LoaderCallbacks {
+    class DetailsHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         private final int LOADER_FAVORITES=1;
         private final int LOADER_REVIEWS=2;
         private final int LOADER_TRAILERS=3;
@@ -262,15 +263,24 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
         }
         void bind(Cursor cursor) {
             clearOldLoaders();
-            mFavorite=cursor.getInt(COL_FAVORITE)==1;
-            mMid = cursor.getInt(COL_MID);
-            mDateTextView.setText(cursor.getString(COL_RELEASE_DATE));
-            mPlotTextView.setText(cursor.getString(COL_PLOT));
-            mRatingTextView.setText(String.format("%.2f", cursor.getFloat(COL_VOTE_AVERAGE)));
-            mTitleTextView.setText(cursor.getString(COL_TITLE));
+            /**
+                Counting on using the contract projections and
+             the colmuns are stable between tables (TopRated.IDX.RANK==Popular.IDX.RANK).
+             */
+            mFavorite=cursor.getInt(Favorites.IDX.FAVORITE)==1;
+            mMid = cursor.getInt(Favorites.IDX.MID);
+            mDateTextView.setText(cursor.getString(Favorites.IDX.RELEASE_DATE));
+            mPlotTextView.setText(cursor.getString(Favorites.IDX.PLOT));
+            mRatingTextView.setText(String.format("%.2f",
+                                                  cursor.getFloat(Favorites.IDX.VOTE_AVERAGE)));
+            mTitleTextView.setText(cursor.getString(Favorites.IDX.TITLE));
             setFavoriteImage();
             String uri = "http://image.tmdb.org/t/p/w185" +
-                    cursor.getString(COL_POSTER_PATH);
+                    cursor.getString(Favorites.IDX.POSTER_PATH);
+            /**
+             * Decided to not cache images/videos in the db. My plex server DB is 12GB,
+             * which would kill my cell phone. Glide/Picasso do some local caching I think.
+             */
             Glide.with(getContext())
                     .load(uri)
                     .placeholder(R.mipmap.ic_launcher)
@@ -287,32 +297,6 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             setFavoriteImage();
         }
 
-        @Override
-        public Loader onCreateLoader(int id, Bundle args) {
-            switch(id){
-                case LOADER_FAVORITES:
-                case LOADER_REVIEWS:
-                case LOADER_TRAILERS:
-            }
-            return null;
-        }
 
-        @Override
-        public void onLoaderReset(Loader loader) {
-            switch(loader.getId()){
-                case LOADER_FAVORITES:
-                case LOADER_REVIEWS:
-                case LOADER_TRAILERS:
-            }
-        }
-
-        @Override
-        public void onLoadFinished(Loader loader, Object data) {
-            switch(loader.getId()){
-                case LOADER_FAVORITES:
-                case LOADER_REVIEWS:
-                case LOADER_TRAILERS:
-            }
-        }
     }
 }

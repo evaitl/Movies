@@ -13,7 +13,7 @@ import android.util.Log;
 class MovieDBHelper extends SQLiteOpenHelper {
     private static final String TAG = MovieDBHelper.class.getSimpleName();
     private static final String DATABASE_NAME = "movies.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 856;
 
     public MovieDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -51,7 +51,10 @@ class MovieDBHelper extends SQLiteOpenHelper {
                 "poster_path text not null," +
                 "release_date text not null," +
                 "vote_count integer not null," +
-                "vote_average real not null);");
+                "vote_average real not null,"+
+
+                "genres text not null"+
+                ");");
 
         db.execSQL(
             "create table favorites(" +
@@ -60,11 +63,18 @@ class MovieDBHelper extends SQLiteOpenHelper {
                 "favorite integer not null default 0" +
                 ");");
 
+/**
+I feel bad about this. By all SQL theory, we should have a genres table and do a join,
+but it is just too much work for the payback. Instead I'm putting the genre ids
+in a text column in the movies table. When we look at a movies row,
+ we'll convert the ids to strings from the genre_names table.
+
         // genre/movie/list
         db.execSQL("create table genres(" +
                        "_id integer primary key autoincrement," +
                        "mid integer not null," +
                        "gid integer not null);");
+*/
 
         // movie/top_rated?page=XXX
         db.execSQL(
@@ -79,7 +89,9 @@ I'm not setting the ranks in the lists as unique because data will be fetched
 periodically and we won't ever fetch the whole database in a single swell foop.
 
 Sometimes we will have more than one movie in the local cache with the same rank
-until we get around to updating our local data to fix it. NBD.
+until we get around to updating our local data to fix it. IMHO is better to have a
+popular/toprated movie off a few places on the list than knocked off the list.
+NBD.
  */
         // movie/popular?page=XXX
         db.execSQL(
@@ -131,8 +143,7 @@ until we get around to updating our local data to fix it. NBD.
                 "last_tr_page integer not null, " +
                 "max_tr_page integer not null, " +
                 "last_pop_page integer not null, " +
-                "max_pop_page integer not null," +
-                "genre_fetched integer not null"+
+                "max_pop_page integer not null" +
                 ");");
 
 

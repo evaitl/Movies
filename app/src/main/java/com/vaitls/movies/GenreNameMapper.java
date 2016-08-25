@@ -22,6 +22,18 @@ import retrofit2.http.Query;
 
 /**
  * Created by evaitl on 8/24/16.
+ *
+ *
+ * We aren't supposed to do networking or grab a cursor in the UI thread,
+ * so this does both in the background. Try to get the genre names
+ * from the db. If there aren't any, fetch them from web (should only
+ * happen once per install). If we fail, try MAX_TRIES times before
+ * giving up with a little bit of a backoff.
+ *
+ * After the db is initalized, this just loads the db and is called to
+ * map from genre IDs to genre names.
+ *
+ * TODO: refresh the genre names table based on the Expires header.
  */
 public class GenreNameMapper {
     private static final String TAG = GenreNameMapper.class.getSimpleName();
@@ -63,7 +75,7 @@ public class GenreNameMapper {
     }
 
     private static class GenreLoader extends AsyncTask<Void, Void, Cursor> {
-        private static final int MAX_TRIES = 3;
+        private static final int MAX_TRIES = 4;
         private static int tries = 0;
         private Context mContext;
         private String sApiKey;
@@ -79,17 +91,17 @@ public class GenreNameMapper {
          * @return a genreNames cursor or null
          */
         Cursor getGenreNamesCursor() {
-            Cursor c = mContext.getContentResolver().query(Contract.GenreNames.URI,
+            Cursor cursor = mContext.getContentResolver().query(Contract.GenreNames.URI,
                                                            Contract.GenreNames.PROJECTION,
                                                            null, null, null);
-            if (c == null) {
-                return c;
-            }
-            if (c.getCount() == 0) {
-                c.close();
+            if (cursor == null) {
                 return null;
             }
-            return c;
+            if (cursor.getCount() == 0) {
+                cursor.close();
+                return null;
+            }
+            return cursor;
         }
 
         /**
@@ -101,29 +113,23 @@ public class GenreNameMapper {
             ContentValues[] contentValues = new ContentValues[names.length];
             int i = 0;
             for (GenreName name : names) {
-                contentValues[i] =
+                contentValues[i++] =
                     Contract.buildGenreNames()
                         .putName(name.getName())
                         .putGid(name.getId())
                         .build();
-                ++i;
             }
             mContext.getContentResolver().bulkInsert(Contract.GenreNames.URI, contentValues);
         }
 
         /**
-         * We aren't supposed to do networking or grab a cursor in the UI thread,
-         * so this does both in the background. Try to get the genre names
-         * from the db. If there aren't any, fetch them from web (should only
-         * happen once per install). If we fail, try MAX_TRIES times before
-         * giving up with a little bit of a backoff.
          *
          * @return A cursor with data in the database or null
          */
         @Override
         protected Cursor doInBackground(Void... params) {
             Cursor cursor = getGenreNamesCursor();
-            if (cursor == null && cursor.getCount() != 0) {
+            if (cursor != null && cursor.getCount() != 0) {
                 return cursor;
             }
             Response<GenreName[]> rp = null;

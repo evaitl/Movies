@@ -17,7 +17,8 @@ import static com.vaitls.movies.data.Contract.TopRated;
 import static com.vaitls.movies.data.Contract.Popular;
 import static com.vaitls.movies.data.Contract.Reviews;
 import static com.vaitls.movies.data.Contract.Videos;
-
+import static com.vaitls.movies.data.Contract.GenreNames;
+import static com.vaitls.movies.data.Contract.MatcherIdxs;
 /**
  * Created by evaitl on 8/16/16.
  *
@@ -35,62 +36,53 @@ public class MovieProvider extends ContentProvider {
     private Map<String, String> reviewsProjectionMap;
     private Map<String, String> videosProjectionMap;
 
+
+    /**
+     * TODO add delete support for db pruning.
+     * @param uri
+     * @param selection
+     * @param selectionArgs
+     * @return
+     */
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs) {
-        int count = 0;
-        switch (uriMatcher.match(uri)) {
-            case Contract.M_FAVORITE:
-                count = db.delete(Contract.FAVORITES, selection, selectionArgs);
-                break;
-            default:
-                throw new IllegalArgumentException("Delete URI" + uri);
 
-        }
-        getContext().getContentResolver().notifyChange(uri, null);
-        return count;
+        throw new UnsupportedOperationException("No deletes supported: "+uri);
     }
 
     @Nullable
     @Override
     public String getType(Uri uri) {
-        StringBuilder stringBuilder = new StringBuilder("vnd.android.cursor.");
-        final String ITEM = "item/vnd.com.vaitls.movies.";
-        final String DIR = "dir/vnd.com.vaitls.movies.";
+        StringBuilder stringBuilder =
+            new StringBuilder("vnd.android.cursor.dir/vnd.com.vaitls.movies.");
+        /**
+         * We just directories. Use a 'where' clause to get
+         * an individual item.
+         */
         switch (uriMatcher.match(uri)) {
-            case Contract.M_META:
-                stringBuilder.append(ITEM);
-                stringBuilder.append(Contract.META);
+            case Contract.MatcherIdxs.MOVIES:
+                stringBuilder.append(Contract.TableNames.MOVIES);
                 break;
-            case Contract.M_FAVORITE:
-                stringBuilder.append(ITEM);
-                stringBuilder.append(Contract.FAVORITES);
+            case Contract.MatcherIdxs.FAVORITES:
+                stringBuilder.append(Contract.TableNames.FAVORITES);
                 break;
-            case Contract.M_FAVORITES_DIR:
-                stringBuilder.append(DIR);
-                stringBuilder.append(Contract.FAVORITES);
+             case Contract.MatcherIdxs.GENRE_NAMES:
+                stringBuilder.append(Contract.TableNames.GENRE_NAMES);
                 break;
-            case Contract.M_MOVIE:
-                stringBuilder.append(ITEM);
-                stringBuilder.append(Contract.MOVIE);
-            case Contract.M_MOVIES_DIR:
-                stringBuilder.append(DIR);
-                stringBuilder.append(Contract.MOVIE);
+            case Contract.MatcherIdxs.TOPRATED:
+                stringBuilder.append(Contract.TableNames.TOPRATED);
                 break;
-            case Contract.M_POPULAR:
-                stringBuilder.append(ITEM);
-                stringBuilder.append(Contract.POPULAR);
+            case Contract.MatcherIdxs.META:
+                stringBuilder.append(Contract.TableNames.META);
                 break;
-            case Contract.M_POPULAR_DIR:
-                stringBuilder.append(DIR);
-                stringBuilder.append(Contract.POPULAR);
+            case Contract.MatcherIdxs.POPULAR:
+                stringBuilder.append(Contract.TableNames.POPULAR);
                 break;
-            case Contract.M_TOPRATED:
-                stringBuilder.append(ITEM);
-                stringBuilder.append(Contract.TOPRATED);
+            case Contract.MatcherIdxs.VIDEOS:
+                stringBuilder.append(Contract.TableNames.VIDEOS);
                 break;
-            case Contract.M_TOPRATED_DIR:
-                stringBuilder.append(DIR);
-                stringBuilder.append(Contract.TOPRATED);
+            case Contract.MatcherIdxs.REVIEWS:
+                stringBuilder.append(Contract.TableNames.REVIEWS);
                 break;
             default:
                 throw new IllegalArgumentException("unknown query " + uri);
@@ -104,29 +96,29 @@ public class MovieProvider extends ContentProvider {
         long rowID = -1;
         Uri.Builder retBuilder = Contract.BASE_CONTENT_URI.buildUpon();
         switch (uriMatcher.match(uri)) {
-            case Contract.M_META:
-                rowID=db.insert(Contract.META, null, values);
-                retBuilder.appendEncodedPath(Contract.META);
+            case Contract.MatcherIdxs.MOVIES :
+                rowID=db.insert(Contract.TableNames.MOVIES, null, values);
                 break;
-            case Contract.M_FAVORITES_DIR:
-                rowID = db.insert(Contract.FAVORITES, null, values);
-                retBuilder.appendEncodedPath(Contract.FAVORITES);
+            case Contract.MatcherIdxs.FAVORITES :
+                rowID=db.insert(Contract.TableNames.FAVORITES, null, values);
                 break;
-            case Contract.M_TOPRATED_DIR:
-                rowID = db.insert(Contract.TOPRATED, null, values);
-                retBuilder.appendEncodedPath(Contract.TOPRATED);
+            case Contract.MatcherIdxs.META :
+                rowID=db.insert(Contract.TableNames.META, null, values);
                 break;
-            case Contract.M_MOVIES_DIR:
-                rowID = db.insert(Contract.MOVIE, null, values);
-                retBuilder.appendEncodedPath(Contract.MOVIE);
+            case Contract.MatcherIdxs.GENRE_NAMES :
+                rowID=db.insert(Contract.TableNames.GENRE_NAMES, null, values);
                 break;
-            case Contract.M_POPULAR_DIR:
-                rowID = db.insert(Contract.POPULAR, null, values);
-                retBuilder.appendEncodedPath(Contract.POPULAR);
+            case Contract.MatcherIdxs.TOPRATED :
+                rowID=db.insert(Contract.TableNames.TOPRATED, null, values);
                 break;
-            case Contract.M_REVIEWS_DIR:
-                rowID = db.insert(Contract.MOVIE, null, values);
-                retBuilder.appendEncodedPath(Contract.MOVIE);
+            case Contract.MatcherIdxs.POPULAR :
+                rowID=db.insert(Contract.TableNames.POPULAR, null, values);
+                break;
+            case Contract.MatcherIdxs.VIDEOS :
+                rowID=db.insert(Contract.TableNames.VIDEOS, null, values);
+                break;
+            case Contract.MatcherIdxs.REVIEWS :
+                rowID=db.insert(Contract.TableNames.REVIEWS, null, values);
                 break;
             default:
                 throw new IllegalArgumentException("Insert URI" + uri);
@@ -141,42 +133,32 @@ public class MovieProvider extends ContentProvider {
     }
 
     /**
-     * Most of the queries are actually of joins, so we need projection maps
-     * to get the right fields.
+     * Several of the queries are actually of joins instead of tables,
+     * so we need projection maps to get the right fields.
      */
     private void fillProjectionMaps() {
         favoritesProjectionMap = new HashMap<>();
-        favoritesProjectionMap.put(Favorites.COL_MID, "movies.mid");
-        favoritesProjectionMap.put(Favorites.COL__ID, "movies._id");
-        favoritesProjectionMap.put(Favorites.COL_TITLE, "movies.title");
-        favoritesProjectionMap.put(Favorites.COL_PLOT, "movies.plot");
-        favoritesProjectionMap.put(Favorites.COL_POSTER_PATH,"movies.poster_path");
-        favoritesProjectionMap.put(Favorites.COL_RELEASE_DATE,"movies.release_date");
-        favoritesProjectionMap.put(Favorites.COL_VOTE_AVERAGE, "movies.vote_average");
-        favoritesProjectionMap.put(Favorites.COL_FAVORITE, "favorites.favorite");
+        favoritesProjectionMap.put(Favorites.COLS.MID, "movies.mid");
+        favoritesProjectionMap.put(Favorites.COLS._ID, "movies._id");
+        favoritesProjectionMap.put(Favorites.COLS.TITLE, "movies.title");
+        favoritesProjectionMap.put(Favorites.COLS.PLOT, "movies.plot");
+        favoritesProjectionMap.put(Favorites.COLS.POSTER_PATH,"movies.poster_path");
+        favoritesProjectionMap.put(Favorites.COLS.RELEASE_DATE,"movies.release_date");
+        favoritesProjectionMap.put(Favorites.COLS.VOTE_AVERAGE, "movies.vote_average");
+        favoritesProjectionMap.put(Favorites.COLS.VOTE_COUNT,"movies.vote_count");
+        favoritesProjectionMap.put(Favorites.COLS.GENRES,"movies.genres");
+        favoritesProjectionMap.put(Favorites.COLS.FAVORITE, "favorites.favorite");
 
         topRatedProjectionMap = new HashMap<>(favoritesProjectionMap);
-        topRatedProjectionMap.put(TopRated.COL_RANK, "toprated.rank");
-        topRatedProjectionMap.put(TopRated.COL_EXPIRES, "toprated.expires");
+        topRatedProjectionMap.put(TopRated.COLS.RANK, "toprated.rank");
+        topRatedProjectionMap.put(TopRated.COLS.EXPIRES, "toprated.expires");
 
         popularProjectionMap = new HashMap<>(favoritesProjectionMap);
-        popularProjectionMap.put(Popular.COL_RANK, "popular.rank");
-        popularProjectionMap.put(Popular.COL_EXPIRES, "popular.expires");
+        popularProjectionMap.put(Popular.COLS.RANK, "popular.rank");
+        popularProjectionMap.put(Popular.COLS.EXPIRES, "popular.expires");
 
-        reviewsProjectionMap = new HashMap<>(favoritesProjectionMap);
-        reviewsProjectionMap.put(Reviews.COL_ID, "reviews.id");
-        reviewsProjectionMap.put(Reviews.COL_AUTHOR, "reviews.author");
-        reviewsProjectionMap.put(Reviews.COL_CONTENT, "reviews.content");
-        reviewsProjectionMap.put(Reviews.COL_URL, "reviews.url");
-
-        videosProjectionMap = new HashMap<>(favoritesProjectionMap);
-        videosProjectionMap.put(Videos.COL_ID, "videos.id");
-        videosProjectionMap.put(Videos.COL_LANG, "videos.iso_639_1");
-        videosProjectionMap.put(Videos.COL_NAME, "videos.name");
-        videosProjectionMap.put(Videos.COL_SITE, "videos.site");
-        videosProjectionMap.put(Videos.COL_KEY, "videos.key");
     }
-
+    private Map<String,String> genreNamesProjectionMap;
     @Override
     public boolean onCreate() {
         mMovieDBHelper = new MovieDBHelper(getContext());
@@ -186,49 +168,67 @@ public class MovieProvider extends ContentProvider {
         return db != null;
     }
 
+
+    /**
+     * I'm not sure I made the right choice here. I think there are three ways to go with
+     * these queries:
+     *
+     * <ol>
+     *     <li>Raw tables and let callers specify joins.</li>
+     *     <li>Do the joins on the query (here)</li>
+     *     <li>Create views with joins and have queries specify
+     *     views instead of tables.</li>
+     * </ol>
+     * I guess I decided that the first is two hard and the third is too abstract. A good
+     * argument could be made though that I should have gone with the views. I'll probably
+     * do that next time.
+     *
+     * @param uri
+     * @param projection
+     * @param selection
+     * @param selectionArgs
+     * @param sortOrder
+     * @return
+     */
     @Nullable
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
 
         switch (uriMatcher.match(uri)) {
-            case Contract.M_META:
-                qb.setTables("meta");
+            case MatcherIdxs.GENRE_NAMES:
+                qb.setTables(Contract.TableNames.GENRE_NAMES);
                 break;
-            case Contract.M_FAVORITES_DIR:
-                qb.setTables("movies inner join favorites on movies.mid=favorites.mid");
+            case MatcherIdxs.META:
+                qb.setTables(Contract.TableNames.META);
+                break;
+            case MatcherIdxs.REVIEWS:
+                qb.setTables(Contract.TableNames.REVIEWS);
+                break;
+            case MatcherIdxs.VIDEOS:
+                qb.setTables(Contract.TableNames.VIDEOS);
+                break;
+            case MatcherIdxs.FAVORITES:
                 qb.setProjectionMap(favoritesProjectionMap);
-                if(sortOrder==null){
-                    /*
-                    TODO: 1 utf8 nocase collation function
-                    TODO: 2 title collation -- skips articles (a, the) in sorting.
-
-                    "Die Hard" in a german locale on xbmc always ends up at H....
-                     */
-                    sortOrder="title collate nocase";
-                }
+                qb.setTables("movies inner join favorites on movies.mid=favorites.mid");
                 break;
-            case Contract.M_TOPRATED_DIR:
-                qb.setTables("movies inner join toprated on movies.mid=toprated.mid "+
-                        "left join favorites on movies.mid=favorites.mid"
-               );
+            case MatcherIdxs.TOPRATED:
                 qb.setProjectionMap(topRatedProjectionMap);
-                if(sortOrder==null){
-                    sortOrder="rank asc";
-                }
+                qb.setTables(
+                    "movies left join favorites on movies.mid=favorites.mid "+
+                    "inner join toprated on movies.mid=toprated.mid");
                 break;
-            case Contract.M_POPULAR_DIR:
-                qb.setTables("movies inner join popular on popular.mid=movies.mid "+
-                "left join favorites on movies.mid=favorites.mid");
+            case MatcherIdxs.POPULAR:
                 qb.setProjectionMap(popularProjectionMap);
-                if(sortOrder==null){
-                    sortOrder="rank asc";
-                }
+                qb.setTables(
+                    "movies left join favorites on movies.mid=favorites.mid "+
+                    "inner join popular on movies.mid=popular.mid");
                 break;
             default:
                 throw new IllegalArgumentException("unhandled URI"+uri);
         }
         Cursor c=qb.query(db,projection,selection,selectionArgs,null,null,sortOrder);
+        // TODO: Should set for all tables in the join?
         c.setNotificationUri(getContext().getContentResolver(),uri);
         return c;
     }

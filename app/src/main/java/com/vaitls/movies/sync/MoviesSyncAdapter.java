@@ -21,6 +21,7 @@ import com.vaitls.movies.R;
 import com.vaitls.movies.data.Contract;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Date;
 
 import retrofit2.Call;
@@ -33,6 +34,7 @@ import retrofit2.http.Query;
 
 import static com.vaitls.movies.data.Contract.Movies;
 import static com.vaitls.movies.data.Contract.TopRated;
+import static com.vaitls.movies.data.Contract.Meta;
 import static java.lang.Math.min;
 
 
@@ -52,21 +54,7 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
     // More or less....
     private static final int SYNC_FLEXTIME = SYNC_INTERVAL / 2;
     private static String sApiKey;
-    private final String[] MOVIES_PROJECTION = {
-            Movies.COL_MID,
-            Movies.COL_TITLE,
-            Movies.COL_PLOT,
-            Movies.COL_POSTER_PATH,
-            Movies.COL_RELEASE_DATE,
-            Movies.COL_VOTE_AVERAGE,
-    };
-    private final String[] META_PROJECTION = {
-            Contract.Meta.COL_LAST_POP_PAGE,
-            Contract.Meta.COL_LAST_TR_PAGE,
-            Contract.Meta.COL_MAX_POP_PAGE,
-            Contract.Meta.COL_MAX_TR_PAGE,
-    };
-    ContentResolver mContentResolver;
+    private ContentResolver mContentResolver;
     private int lastPopPage;
     private int lastTrPage;
     private int maxPopPage;
@@ -174,14 +162,14 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void getDbMeta() {
-        Cursor meta = mContentResolver.query(Contract.META_URI,
-                                             META_PROJECTION, null, null, null);
+        Cursor meta = mContentResolver.query(Meta.URI,
+                                             Meta.PROJECTION, null, null, null);
         if (meta != null && meta.getCount()>0){
             meta.moveToFirst();
-            lastPopPage = meta.getInt(0);
-            lastTrPage = meta.getInt(1);
-            maxPopPage = meta.getInt(2);
-            maxTrPage = meta.getInt(3);
+            lastPopPage = meta.getInt(Meta.IDX.LAST_POP_PAGE);
+            lastTrPage = meta.getInt(Meta.IDX.LAST_TR_PAGE);
+            maxPopPage = meta.getInt(Meta.IDX.MAX_POP_PAGE);
+            maxTrPage = meta.getInt(Meta.IDX.MAX_TR_PAGE);
         }else{
             maxPopPage=maxTrPage=MAX_PAGE;
         }
@@ -193,12 +181,13 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     private void writeDbMeta() {
-        ContentValues metaValues = new ContentValues();
-        metaValues.put(Contract.Meta.COL_LAST_POP_PAGE, lastPopPage);
-        metaValues.put(Contract.Meta.COL_LAST_TR_PAGE, lastTrPage);
-        metaValues.put(Contract.Meta.COL_MAX_POP_PAGE, maxPopPage);
-        metaValues.put(Contract.Meta.COL_MAX_TR_PAGE, maxTrPage);
-        mContentResolver.insert(Contract.META_URI, metaValues);
+        ContentValues metaValues = Contract.buildMeta()
+            .putLastPopPage(lastPopPage)
+            .putLastTRPage(lastTrPage)
+            .putMaxPopPage(maxPopPage)
+            .putMaxTRPage(maxTrPage)
+            .build();
+        mContentResolver.insert(Contract.Meta.URI, metaValues);
     }
 
     private void saveMi(MovieInfo mi, MovieListType type, long expires, int rank) {
@@ -210,27 +199,32 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
             Log.i(TAG,"skipping movie store: "+mi.getTitle());
             return;
         }
-        ContentValues movieValues=new ContentValues();
 
-        movieValues.put(Movies.COL_MID, mi.getId());
-        movieValues.put(Movies.COL_RELEASE_DATE , mi.getRelease_date());
-        movieValues.put(Movies.COL_PLOT , mi.getOverview());
-        movieValues.put(Movies.COL_POSTER_PATH , mi.getPoster_path());
-        movieValues.put(Movies.COL_TITLE , mi.getTitle());
-        movieValues.put(Movies.COL_VOTE_AVERAGE, mi.getVote_average());
-        movieValues.put(Movies.COL_VOTE_COUNT, mi.getVote_count());
+        ContentValues movieValues=Contract.buildMovies()
+            .putMid(mi.getId())
+            .putPlot(mi.getOverview())
+            .putPosterPath(mi.getPoster_path())
+            .putReleaseDate(mi.getRelease_date())
+            .putTitle(mi.getTitle())
+            .putVoteAverage(mi.getVote_average())
+            .putVoteCount(mi.getVote_count())
+            .putGenres(Arrays.toString(mi.getGenre_ids()))
+            .build();
 
-        mContentResolver.insert(Contract.MOVIE_INFO_URI,movieValues);
+        mContentResolver.insert(Movies.URI,movieValues);
 
-        ContentValues listValues = new ContentValues();
-        listValues.put(TopRated.COL_RANK, rank);
-        listValues.put(TopRated.COL_MID, mi.getId());
-        listValues.put(TopRated.COL_EXPIRES, expires);
+        // Counts on TR and Pop lists being the same in Contract.
+        ContentValues listValues =  Contract.buildTopRated()
+            .putExpires(expires)
+            .putMid(mi.getId())
+            .putRank(rank)
+            .build();
+
         Uri uri;
         if (type == MovieListType.POPULAR) {
-            uri = Contract.POPULAR_URI;
+            uri = Contract.Popular.URI;
         } else {
-            uri = Contract.TOP_RATED_URI;
+            uri = TopRated.URI;
         }
         mContentResolver.insert(uri, listValues);
     }

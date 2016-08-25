@@ -20,7 +20,9 @@ import android.net.Uri;
  * are a subset of the fields in the COLS classes. The buildXXX functions return fluent
  * interfaces for ContentValues builders appropriate for the various tables.
  */
-public class Contract {
+public final class Contract {
+    // You don't make new contracts.
+    private Contract(){}
     static final UriMatcher uriMatcher;
     static final String CONTENT_AUTH = "com.vaitls.movies.app";
     static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTH);
@@ -32,7 +34,6 @@ public class Contract {
         uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
         uriMatcher.addURI(CONTENT_AUTH, TableNames.FAVORITES, MatcherIdxs.FAVORITES);
         uriMatcher.addURI(CONTENT_AUTH, TableNames.MOVIES, MatcherIdxs.MOVIES);
-        uriMatcher.addURI(CONTENT_AUTH, TableNames.GENRES, MatcherIdxs.GENRES);
         uriMatcher.addURI(CONTENT_AUTH, TableNames.TOPRATED, MatcherIdxs.TOPRATED);
         uriMatcher.addURI(CONTENT_AUTH, TableNames.POPULAR, MatcherIdxs.POPULAR);
         uriMatcher.addURI(CONTENT_AUTH, TableNames.VIDEOS, MatcherIdxs.VIDEOS);
@@ -49,10 +50,6 @@ public class Contract {
         return new TopRatedBuilder();
     }
 
-    public static GenresBuilder buildGenres() {
-        return new GenresBuilder();
-    }
-
     public static MoviesBuilder buildMovies() {
         return new MoviesBuilder();
     }
@@ -64,7 +61,7 @@ public class Contract {
     public static GenreNamesBuilder buildGenreNames() {
         return new GenreNamesBuilder();
     }
-
+    public static MetaBuilder buildMeta() {return new MetaBuilder();}
     public interface Meta {
         Uri URI =
             BASE_CONTENT_URI.buildUpon().appendPath(TableNames.META).build();
@@ -100,7 +97,7 @@ public class Contract {
             BASE_CONTENT_URI.buildUpon().appendPath(TableNames.MOVIES).build();
         String[] PROJECTION = {
             COLS._ID, COLS.MID, COLS.TITLE, COLS.PLOT, COLS.POSTER_PATH,
-            COLS.RELEASE_DATE, COLS.VOTE_COUNT, COLS.VOTE_AVERAGE,
+            COLS.RELEASE_DATE, COLS.VOTE_COUNT, COLS.VOTE_AVERAGE, COLS.GENRES,
         };
 
         interface COLS {
@@ -112,6 +109,7 @@ public class Contract {
             String RELEASE_DATE = "release_date";
             String VOTE_COUNT = "vote_count";
             String VOTE_AVERAGE = "vote_average";
+            String GENRES="genres";
         }
 
         interface IDX {
@@ -123,6 +121,7 @@ public class Contract {
             int RELEASE_DATE = 5;
             int VOTE_COUNT = 6;
             int VOTE_AVERAGE = 7;
+            int GENRES=8;
         }
     }
 
@@ -132,7 +131,7 @@ public class Contract {
         String[] PROJECTION = {
             COLS._ID, COLS.MID, COLS.TITLE, COLS.PLOT,
             COLS.POSTER_PATH, COLS.RELEASE_DATE,
-            COLS.VOTE_COUNT, COLS.VOTE_AVERAGE, COLS.FAVORITE
+            COLS.VOTE_COUNT, COLS.VOTE_AVERAGE, COLS.GENRES, COLS.FAVORITE
         };
 
         interface COLS extends Movies.COLS {
@@ -140,7 +139,7 @@ public class Contract {
         }
 
         interface IDX extends Movies.IDX {
-            int FAVORITE = 8;
+            int FAVORITE = 9;
         }
     }
 
@@ -150,7 +149,7 @@ public class Contract {
         String[] PROJECTION = {
             COLS._ID, COLS.MID, COLS.TITLE, COLS.PLOT,
             COLS.POSTER_PATH, COLS.RELEASE_DATE,
-            COLS.VOTE_COUNT, COLS.VOTE_AVERAGE, COLS.FAVORITE,
+            COLS.VOTE_COUNT, COLS.VOTE_AVERAGE, COLS.GENRES, COLS.FAVORITE,
             COLS.RANK, COLS.EXPIRES,
         };
 
@@ -160,8 +159,8 @@ public class Contract {
         }
 
         interface IDX extends Favorites.IDX {
-            int RANK = 9;
-            int EXPIRES = 10;
+            int RANK = 10;
+            int EXPIRES = 11;
         }
     }
 
@@ -239,25 +238,6 @@ public class Contract {
         }
     }
 
-    public interface Genres {
-        Uri URI =
-            BASE_CONTENT_URI.buildUpon().appendPath(TableNames.GENRES).build();
-        String[] PROJECTION = {
-            COLS._ID, COLS.MID, COLS.GID,
-        };
-
-        interface COLS {
-            String _ID = "_id";
-            String MID = "mid";
-            String GID = "gid";
-        }
-
-        interface IDX {
-            int _ID = 0;
-            int MID = 1;
-            int GID = 2;
-        }
-    }
 
     public interface GenreNames {
         Uri URI =
@@ -285,13 +265,12 @@ public class Contract {
     interface MatcherIdxs {
         int MOVIES = 1;
         int FAVORITES = 2;
-        int GENRES = 3;
+        int META=3;
         int TOPRATED = 4;
         int POPULAR = 5;
         int VIDEOS = 6;
         int REVIEWS = 7;
         int GENRE_NAMES = 8;
-        int META = 9;
     }
 
     /**
@@ -300,13 +279,12 @@ public class Contract {
     interface TableNames {
         String MOVIES = "movies";
         String FAVORITES = "favorites";
-        String GENRES = "genres";
+        String META = "meta";
         String TOPRATED = "toprated";
         String POPULAR = "popular";
         String VIDEOS = "videos";
         String REVIEWS = "reviews";
         String GENRE_NAMES = "genre_names";
-        String META = "meta";
     }
 
     static class Builder {
@@ -356,6 +334,10 @@ public class Contract {
             mValues.put(Movies.COLS.VOTE_AVERAGE, voteAverage);
             return this;
         }
+        public MoviesBuilder putGenres(String genres){
+            mValues.put(Movies.COLS.GENRES,genres);
+            return this;
+        }
     }
 
     public static class FavoritesBuilder extends Builder {
@@ -363,19 +345,6 @@ public class Contract {
             mValues.put(Favorites.COLS.MID, mid);
             return this;
         }
-    }
-
-    public static class GenresBuilder extends Builder {
-        public GenresBuilder putMid(int mid) {
-            mValues.put(Genres.COLS.MID, mid);
-            return this;
-        }
-
-        public GenresBuilder putGid(int gid) {
-            mValues.put(Genres.COLS.GID, gid);
-            return this;
-        }
-
     }
 
     public static class TopRatedBuilder extends Builder {
@@ -407,6 +376,24 @@ public class Contract {
 
         public GenreNamesBuilder putName(String name) {
             mValues.put(GenreNames.COLS.NAME, name);
+            return this;
+        }
+    }
+    public static class MetaBuilder extends Builder{
+        public MetaBuilder putLastPopPage(int lastPopPage){
+            mValues.put(Meta.COLS.LAST_POP_PAGE,lastPopPage);
+            return this;
+        }
+        public MetaBuilder putLastTRPage(int lastTRPage){
+            mValues.put(Meta.COLS.LAST_TR_PAGE,lastTRPage);
+            return this;
+        }
+        public MetaBuilder putMaxPopPage(int maxPopPage ){
+            mValues.put(Meta.COLS.MAX_POP_PAGE,maxPopPage);
+            return this;
+        }
+        public MetaBuilder putMaxTRPage(int maxTRPage){
+            mValues.put(Meta.COLS.MAX_TR_PAGE,maxTRPage);
             return this;
         }
     }
