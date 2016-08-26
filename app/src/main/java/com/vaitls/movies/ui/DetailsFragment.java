@@ -27,6 +27,7 @@ import com.vaitls.movies.MovieListType;
 import com.vaitls.movies.R;
 import com.vaitls.movies.data.Contract;
 import com.vaitls.movies.data.GenreNameMapper;
+import com.vaitls.movies.data.ReviewLoader;
 import com.vaitls.movies.data.TrailerLoader;
 
 import static com.vaitls.movies.data.Contract.Favorites;
@@ -256,7 +257,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
 
 
     class DetailsHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
-        TrailerLoader.TrailerCallback {
+        TrailerLoader.TrailerCallback, ReviewLoader.ReviewCallback {
         private final int LOADER_FAVORITES = 1;
         private final int LOADER_REVIEWS = 2;
         private final int LOADER_TRAILERS = 3;
@@ -270,7 +271,9 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
         private int mMid;
         private boolean mFavorite;
         private TrailerLoader mTrailerLoader;
+        private ReviewLoader mReviewLoader;
         private boolean mHaveTrailers;
+        private boolean mHaveReviews;
 
         public DetailsHolder(View v) {
             super(v);
@@ -321,6 +324,9 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             if (mTrailerLoader == null && !mHaveTrailers) {
                 mTrailerLoader = new TrailerLoader(getContext(), mMid, this);
             }
+            if (mReviewLoader == null && !mHaveReviews) {
+                mReviewLoader = new ReviewLoader(getContext(), mMid, this);
+            }
         }
 
         public void onTrailersLoaded(Cursor cursor) {
@@ -328,10 +334,6 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             mHaveTrailers = true;
             Log.d(TAG, "maybe we have trailers...");
             if (cursor == null) {
-                return;
-            }
-            if (cursor.getCount() == 0) {
-                cursor.close();
                 return;
             }
             // Create and insert some buttons dynamically?
@@ -343,6 +345,20 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             cursor.close();
         }
 
+        public void onReviewsLoaded(Cursor cursor) {
+            mReviewLoader = null;
+            mHaveReviews = true;
+            Log.d(TAG, "We might have reviews");
+            if (cursor == null) {
+                return;
+            }
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                Log.d(TAG, "reviews: " + cursor.getString(Contract.Reviews.IDX.CONTENT));
+                cursor.moveToNext();
+            }
+        }
+
         /*
 
          */
@@ -351,8 +367,12 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             if (mTrailerLoader != null) {
                 // I don't know you. You don't know me. Go away.
                 mTrailerLoader.cancel();
-                ;
+
                 mTrailerLoader = null;
+            }
+            if (mReviewLoader != null) {
+                mReviewLoader.cancel();
+                mReviewLoader = null;
             }
         }
 
@@ -363,6 +383,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
              */
             cancelLoaders();
             mHaveTrailers = false;
+            mHaveReviews = false;
             mFavorite = cursor.getInt(Favorites.IDX.FAVORITE) == 1;
             mMid = cursor.getInt(Favorites.IDX.MID);
             mDateTextView.setText(cursor.getString(Favorites.IDX.RELEASE_DATE));

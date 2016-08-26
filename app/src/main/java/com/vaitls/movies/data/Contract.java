@@ -54,11 +54,11 @@ public final class Contract {
     public static MoviesBuilder buildMovies() {
         return new MoviesBuilder();
     }
-
+public static BulkBuilder buildBulk() {return new BulkBuilder();}
     public static FavoritesBuilder buildFavorites() {
         return new FavoritesBuilder();
     }
-
+    public static ReviewsBuilder buildReview(){ return new ReviewsBuilder(); }
     public static GenreNamesBuilder buildGenreNames() {
         return new GenreNamesBuilder();
     }
@@ -182,7 +182,7 @@ public final class Contract {
         String[] PROJECTION = {
             COLS._ID,
             COLS.MID,
-            COLS.ID,
+            COLS.RID,
             COLS.AUTHOR,
             COLS.CONTENT,
             COLS.URL,
@@ -191,7 +191,7 @@ public final class Contract {
         interface COLS {
             String _ID = "_id";
             String MID = "mid";
-            String ID = "id";
+            String RID = "rid";
             String AUTHOR = "author";
             String CONTENT = "content";
             String URL = "url";
@@ -200,7 +200,7 @@ public final class Contract {
         interface IDX {
             int _ID = 0;
             int MID = 1;
-            int ID = 2;
+            int RID = 2;
             int AUTHOR = 3;
             int CONTENT = 4;
             int URL = 5;
@@ -368,7 +368,16 @@ public final class Contract {
             return this;
         }
     }
-
+    public static class BulkBuilder extends MoviesBuilder{
+        public BulkBuilder putRank(int rank){
+            mValues.put(TopRated.COLS.RANK,rank);
+            return this;
+        }
+        public BulkBuilder putExpires(long expires){
+            mValues.put(TopRated.COLS.EXPIRES,expires);
+            return this;
+        }
+    }
     public static class PopularBuilder extends TopRatedBuilder {
 
     }
@@ -432,4 +441,28 @@ public final class Contract {
             return this;
         }
     }
+    public static class ReviewsBuilder extends Builder{
+        public ReviewsBuilder putMid (int mid){
+            mValues.put(Reviews.COLS.MID,mid);
+            return this;
+        }
+        public ReviewsBuilder putRid (String rid ){
+            mValues.put(Reviews.COLS.RID,rid );
+            return this;
+        }
+        public ReviewsBuilder putAuthor (String author){
+            mValues.put(Reviews.COLS.AUTHOR, author );
+            return this;
+        }
+        public ReviewsBuilder putContent (String content){
+            mValues.put(Reviews.COLS.CONTENT, content );
+            return this;
+        }
+        public ReviewsBuilder putUrl (String url){
+            mValues.put(Reviews.COLS.URL, url);
+            return this;
+        }
+    }
+
+
 }

@@ -62,7 +62,7 @@ public final class TrailerLoader {
                     rp = TrailersApi.retrofit.create(TrailersApi.class)
                         .getTrailers(mMid, mApiKey).execute();
                 } catch (IOException e) {
-                    Log.e(TAG, "Error loading trailers: " + mid);
+                    Log.e(TAG, "Error loading trailers: " + mid,e);
                 }
                 if (rp == null) {
                     return null;

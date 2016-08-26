@@ -43,6 +43,56 @@ public class MovieProvider extends ContentProvider {
 
 
     /**
+     *
+     * @param tableName
+     * @param values
+     * @return
+     */
+    private int bulkInsertHelper(String tableName, ContentValues[] values){
+        ContentValues listValues;
+        for(ContentValues v:values){
+            if(v==null){
+                continue;
+            }
+            listValues=Contract.buildTopRated()
+                .putExpires(v.getAsLong(TopRated.COLS.EXPIRES))
+                .putMid(v.getAsInteger(TopRated.COLS.MID))
+                .putRank(v.getAsInteger(TopRated.COLS.RANK))
+                .build();
+            v.remove(TopRated.COLS.EXPIRES);
+            v.remove(TopRated.COLS.RANK);
+            db.insert(Contract.TableNames.MOVIES,null,v);
+            db.insert(tableName,null, listValues);
+        }
+        return values.length;
+    }
+    /**
+     * It was taking way too long to get an initial screen. Do an optimization here
+     * to get jsut one notify change per page of movies.
+     * @param uri
+     * @param values
+     * @return
+     */
+    @Override
+    public int bulkInsert(Uri uri, ContentValues[] values) {
+        Log.d(TAG,"bulkInsert "+uri);
+        int cnt;
+        switch (uriMatcher.match(uri)){
+            case MatcherIdxs.POPULAR:
+                cnt=bulkInsertHelper(Contract.TableNames.POPULAR, values);
+                mContentResolver.notifyChange(Popular.URI,null);
+                mContentResolver.notifyChange(Contract.Movies.URI,null);
+                return cnt;
+            case MatcherIdxs.TOPRATED:
+                cnt=bulkInsertHelper(Contract.TableNames.TOPRATED,values);
+                mContentResolver.notifyChange(TopRated.URI,null);
+                mContentResolver.notifyChange(Contract.Movies.URI,null);
+                return cnt;
+        }
+        return super.bulkInsert(uri, values);
+    }
+
+    /**
      * TODO add delete support for db pruning.
      * @param uri
      * @param selection
@@ -103,26 +153,25 @@ public class MovieProvider extends ContentProvider {
         }
         return stringBuilder.toString();
     }
-
+    private ContentResolver mContentResolver;
     @Nullable
     @Override
     public Uri insert(Uri uri, ContentValues values) {
         Log.d(TAG, "insert "+uri);
         long rowID = -1;
-        ContentResolver contentResolver=getContext().getContentResolver();
         Uri.Builder retBuilder = Contract.BASE_CONTENT_URI.buildUpon();
         switch (uriMatcher.match(uri)) {
             case Contract.MatcherIdxs.MOVIES :
                 rowID=db.insert(Contract.TableNames.MOVIES, null, values);
-                contentResolver.notifyChange(Contract.Movies.URI,null);
+                mContentResolver.notifyChange(Contract.Movies.URI,null);
                 // These three are joined to movies on a query
-                contentResolver.notifyChange(Favorites.URI,null);
-                contentResolver.notifyChange(TopRated.URI,null);
-                contentResolver.notifyChange(Popular.URI,null);
+                mContentResolver.notifyChange(Favorites.URI,null);
+                mContentResolver.notifyChange(TopRated.URI,null);
+                mContentResolver.notifyChange(Popular.URI,null);
                 break;
             case Contract.MatcherIdxs.FAVORITES :
                 rowID=db.insert(Contract.TableNames.FAVORITES, null, values);
-                contentResolver.notifyChange(Favorites.URI,null);
+                mContentResolver.notifyChange(Favorites.URI,null);
                 // Really should notify TR and Pop here, but they can't see in this app.
                 // Don't trigger more work than necessary.
                 break;
@@ -131,23 +180,23 @@ public class MovieProvider extends ContentProvider {
                 break;
             case Contract.MatcherIdxs.GENRE_NAMES :
                 rowID=db.insert(Contract.TableNames.GENRE_NAMES, null, values);
-                contentResolver.notifyChange(GenreNames.URI,null);
+                mContentResolver.notifyChange(GenreNames.URI,null);
                 break;
             case Contract.MatcherIdxs.TOPRATED :
                 rowID=db.insert(Contract.TableNames.TOPRATED, null, values);
-                contentResolver.notifyChange(TopRated.URI,null);
+                mContentResolver.notifyChange(TopRated.URI,null);
                 break;
             case Contract.MatcherIdxs.POPULAR :
                 rowID=db.insert(Contract.TableNames.POPULAR, null, values);
-                contentResolver.notifyChange(Popular.URI,null);
+                mContentResolver.notifyChange(Popular.URI,null);
                 break;
             case Contract.MatcherIdxs.VIDEOS :
                 rowID=db.insert(Contract.TableNames.VIDEOS, null, values);
-                contentResolver.notifyChange(Videos.URI,null);
+                mContentResolver.notifyChange(Videos.URI,null);
                 break;
             case Contract.MatcherIdxs.REVIEWS :
                 rowID=db.insert(Contract.TableNames.REVIEWS, null, values);
-                contentResolver.notifyChange(Reviews.URI,null);
+                mContentResolver.notifyChange(Reviews.URI,null);
                 break;
             default:
                 throw new IllegalArgumentException("Insert URI" + uri);
@@ -157,7 +206,7 @@ public class MovieProvider extends ContentProvider {
         }
         retBuilder.appendEncodedPath(String.valueOf(rowID));
         Uri rUri = retBuilder.build();
-        contentResolver.notifyChange(rUri, null);
+        mContentResolver.notifyChange(rUri, null);
         return rUri;
     }
 
@@ -193,6 +242,7 @@ public class MovieProvider extends ContentProvider {
         mMovieDBHelper = new MovieDBHelper(getContext());
         db = mMovieDBHelper.getWritableDatabase();
         uriMatcher = Contract.uriMatcher;
+        mContentResolver=getContext().getContentResolver();
         fillProjectionMaps();
         return db != null;
     }
@@ -265,7 +315,7 @@ public class MovieProvider extends ContentProvider {
                 throw new IllegalArgumentException("unhandled URI"+uri);
         }
         Cursor c=qb.query(db,projection,selection,selectionArgs,null,null,sortOrder);
-        c.setNotificationUri(getContext().getContentResolver(),uri);
+        c.setNotificationUri(mContentResolver,uri);
         return c;
     }
 

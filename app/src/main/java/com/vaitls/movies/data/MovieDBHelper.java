@@ -13,7 +13,7 @@ import android.util.Log;
 class MovieDBHelper extends SQLiteOpenHelper {
     private static final String TAG = MovieDBHelper.class.getSimpleName();
     private static final String DATABASE_NAME = "movies.db";
-    private static final int DATABASE_VERSION = 4;
+    private static final int DATABASE_VERSION = 5;
 
     public MovieDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -110,7 +110,7 @@ NBD.
         db.execSQL("create table videos(" +
                        "_id integer primary key autoincrement," +
                        "mid integer not null," +
-                       "vid text not null," +
+                       "vid text not null unique on conflict replace," +
                        "iso_639_1 text not null," +
                        "name text not null," +
                        "site text not null," +
@@ -121,7 +121,7 @@ NBD.
         db.execSQL("create table reviews(" +
                        "_id integer primary key autoincrement," +
                        "mid integer not null," +
-                       "id text not null," +
+                       "rid text not null unique on conflict replace," +
                        "author text not null," +
                        "content text not null," +
                        "url text not null" +

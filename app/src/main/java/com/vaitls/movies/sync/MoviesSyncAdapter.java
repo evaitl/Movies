@@ -193,44 +193,30 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
         mContentResolver.insert(Contract.Meta.URI, metaValues);
     }
 
-    private void saveMi(MovieInfo mi, MovieListType type, long expires, int rank) {
-        if(!mi.isGoodData()){
-            /*
-            Apparently some of the movie info in the lists is
-            incomplete. This causes SQLiteConstraintExceptions.
-             */
-            Log.i(TAG,"skipping movie store: "+mi.getTitle());
-            return;
+    private void saveBulk(MoviePage mp, long expires, Uri uri){
+        ContentValues [] values=new ContentValues[mp.getTotal_results()];
+        int i=0;
+        int rank=1+(mp.getPage()-1)*mp.getTotal_results();
+        for(MovieInfo mi: mp.getResults()){
+            if(!mi.isGoodData()){
+                continue;
+            }
+            values[i++]=Contract.buildBulk()
+                .putRank(rank++)
+                .putExpires(expires)
+                .putMid(mi.getId())
+                .putPlot(mi.getOverview())
+                .putPosterPath(mi.getPoster_path())
+                .putReleaseDate(mi.getRelease_date())
+                .putTitle(mi.getTitle())
+                .putVoteAverage(mi.getVote_average())
+                .putVoteCount(mi.getVote_count())
+                .putGenres(Arrays.toString(mi.getGenre_ids()))
+                .build();
         }
-
-        ContentValues movieValues=Contract.buildMovies()
-            .putMid(mi.getId())
-            .putPlot(mi.getOverview())
-            .putPosterPath(mi.getPoster_path())
-            .putReleaseDate(mi.getRelease_date())
-            .putTitle(mi.getTitle())
-            .putVoteAverage(mi.getVote_average())
-            .putVoteCount(mi.getVote_count())
-            .putGenres(Arrays.toString(mi.getGenre_ids()))
-            .build();
-
-        mContentResolver.insert(Movies.URI,movieValues);
-
-        // Counts on TR and Pop lists being the same in Contract.
-        ContentValues listValues =  Contract.buildTopRated()
-            .putExpires(expires)
-            .putMid(mi.getId())
-            .putRank(rank)
-            .build();
-
-        Uri uri;
-        if (type == MovieListType.POPULAR) {
-            uri = Contract.Popular.URI;
-        } else {
-            uri = TopRated.URI;
-        }
-        mContentResolver.insert(uri, listValues);
+        mContentResolver.bulkInsert(uri,values);
     }
+
 
     /**
      * For now, we are prefetching from the top-rated and popular lists.
@@ -275,11 +261,7 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
                 }
                 MoviePage moviePage = rp.body();
                 maxPopPage = min(moviePage.getTotal_pages(), MAX_PAGE);
-                // Assumes each page has the same number of movies.
-                int rank = 1 + (moviePage.getTotal_results() * (nextPopPage - 1));
-                for (MovieInfo mi : moviePage.getResults()) {
-                    saveMi(mi, MovieListType.POPULAR, expires, rank++);
-                }
+                saveBulk(moviePage,expires,Contract.Popular.URI);
                 lastPopPage = nextPopPage++;
             }
             int nextTRPage = lastTrPage % maxTrPage + 1;
@@ -306,10 +288,7 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
                 MoviePage moviePage = rp.body();
                 maxTrPage = min(moviePage.getTotal_pages(), MAX_PAGE);
                 // Assumes each page has the same number of movies.
-                int rank = 1 + (moviePage.getTotal_results() * (nextTRPage - 1));
-                for (MovieInfo mi : moviePage.getResults()) {
-                    saveMi(mi, MovieListType.TOPRATED, expires, rank++);
-                }
+                saveBulk(moviePage, expires,TopRated.URI);
                 lastTrPage = nextTRPage++;
             }
         } catch (IOException e) {
