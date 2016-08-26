@@ -1,4 +1,4 @@
-package com.vaitls.movies;
+package com.vaitls.movies.data;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.vaitls.movies.data.Contract;
+import com.vaitls.movies.R;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -23,49 +23,51 @@ import retrofit2.http.Query;
 
 /**
  * Created by evaitl on 8/24/16.
- *
- *
+ * <p/>
+ * <p/>
  * We aren't supposed to do networking or grab a cursor in the UI thread,
  * so this does both in the background. Try to get the genre names
  * from the db. If there aren't any, fetch them from web (should only
  * happen once per install). If we fail, try MAX_TRIES times before
  * giving up with a little bit of a backoff.
- *
+ * <p/>
  * After the db is initalized, this just loads the db and is called to
  * map from genre IDs to genre names.
- *
+ * <p/>
  * TODO: refresh the genre names table based on the Expires header.
  */
 public final class GenreNameMapper {
     private static final String TAG = GenreNameMapper.class.getSimpleName();
-    private static Map<Integer, String> sNames=new HashMap<>();
+    private static Map<Integer, String> sNames = new HashMap<>();
 
     // Don't make these.
-    private GenreNameMapper(){}
+    private GenreNameMapper() {
+    }
 
-    static void loadGenres(Context context) {
+    public static void loadGenres(Context context) {
         new GenreLoader(context).execute();
     }
 
-    static String lookup(Integer a) {
+    public static String lookup(Integer a) {
         String value = sNames.get(a);
         if (value == null) {
             value = a.toString();
         }
         return value;
     }
-    static String map(String ids){
-        String []tokens=ids.split("[^0-9]");
-        StringBuilder sb=new StringBuilder(35);
-        boolean first=true;
-        for(String s:tokens){
-            if(s.equals("")){
+
+    public static String map(String ids) {
+        String[] tokens = ids.split("[^0-9]");
+        StringBuilder sb = new StringBuilder(35);
+        boolean first = true;
+        for (String s : tokens) {
+            if (s.equals("")) {
                 continue;
             }
-            if(!first) {
+            if (!first) {
                 sb.append(", ");
             }
-            first=false;
+            first = false;
             sb.append(lookup(Integer.parseInt(s)));
         }
         return sb.toString();
@@ -80,21 +82,29 @@ public final class GenreNameMapper {
         @GET("genre/movie/list")
         Call<GenreNames> getGenreNames(@Query("api_key") String sApiKey);
     }
-    private static class GenreNames{
-        GenreName [] genres;
-        private GenreNames(){}
+
+    private static class GenreNames {
+        GenreName[] genres;
+
+        private GenreNames() {
+        }
+
         public GenreName[] getGenres() {
             return genres;
         }
     }
+
     private static class GenreName {
         private int id;
         private String name;
+
         private GenreName() {
         }
+
         public int getId() {
             return id;
         }
+
         public String getName() {
             return name;
         }
@@ -118,8 +128,8 @@ public final class GenreNameMapper {
          */
         Cursor getGenreNamesCursor() {
             Cursor cursor = mContext.getContentResolver().query(Contract.GenreNames.URI,
-                                                           Contract.GenreNames.PROJECTION,
-                                                           null, null, null);
+                                                                Contract.GenreNames.PROJECTION,
+                                                                null, null, null);
             if (cursor == null) {
                 return null;
             }
@@ -149,7 +159,6 @@ public final class GenreNameMapper {
         }
 
         /**
-         *
          * @return A cursor with data in the database or null
          */
         @Override
@@ -186,6 +195,7 @@ public final class GenreNameMapper {
         /**
          * We are back in teh UI thread and either have null or a cursor with data.
          * Save the gid/name in the local map for lookups.
+         *
          * @param cursor
          */
         @Override

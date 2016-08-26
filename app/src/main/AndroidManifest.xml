@@ -17,13 +17,13 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".DetailsActivity"/>
+        <activity android:name=".ui.DetailsActivity"/>
         <provider
             android:name=".data.MovieProvider"
             android:authorities="@string/content_authority"
             android:exported="false"
             android:syncable="true"/>
-        <activity android:name=".MovieActivity">
+        <activity android:name=".ui.MovieActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

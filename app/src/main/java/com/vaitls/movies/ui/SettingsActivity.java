@@ -1,4 +1,4 @@
-package com.vaitls.movies;
+package com.vaitls.movies.ui;
 
 import android.app.FragmentManager;
 import android.content.Intent;
@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.preference.PreferenceFragment;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+
+import com.vaitls.movies.R;
 
 /**
  * Created by evaitl on 8/20/16.

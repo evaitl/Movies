@@ -1,4 +1,4 @@
-package com.vaitls.movies;
+package com.vaitls.movies.ui;
 
 import android.content.Context;
 import android.content.Intent;
@@ -7,6 +7,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
+
+import com.vaitls.movies.MovieListType;
+import com.vaitls.movies.R;
 
 /**
  * Created by evaitl on 8/1/16.
@@ -30,7 +33,7 @@ public class DetailsActivity extends AppCompatActivity {
         Fragment fragment = fm.findFragmentById(R.id.fragment_container);
 
         if (fragment == null) {
-            fragment = DetailsFragment.newInstance(searchOrder,idx);
+            fragment = DetailsFragment.newInstance(searchOrder, idx);
             fm.beginTransaction()
                     .add(R.id.fragment_container, fragment)
                     .commit();

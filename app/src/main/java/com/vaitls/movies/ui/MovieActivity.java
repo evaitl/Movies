@@ -1,4 +1,4 @@
-package com.vaitls.movies;
+package com.vaitls.movies.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +10,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
+import com.vaitls.movies.MovieListType;
+import com.vaitls.movies.R;
+import com.vaitls.movies.data.GenreNameMapper;
 import com.vaitls.movies.sync.MoviesSyncAdapter;
 
 public class MovieActivity extends AppCompatActivity {

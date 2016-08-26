@@ -1,4 +1,4 @@
-package com.vaitls.movies;
+package com.vaitls.movies.ui;
 
 
 import android.content.Context;

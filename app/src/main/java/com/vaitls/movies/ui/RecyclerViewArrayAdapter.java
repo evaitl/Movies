@@ -1,4 +1,4 @@
-package com.vaitls.movies;
+package com.vaitls.movies.ui;
 
 import android.support.v7.widget.RecyclerView;
 import java.util.List;

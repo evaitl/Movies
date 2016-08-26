@@ -1,4 +1,4 @@
-package com.vaitls.movies;
+package com.vaitls.movies.data;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -6,7 +6,7 @@ import android.database.Cursor;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.vaitls.movies.data.Contract;
+import com.vaitls.movies.R;
 
 import java.io.IOException;
 

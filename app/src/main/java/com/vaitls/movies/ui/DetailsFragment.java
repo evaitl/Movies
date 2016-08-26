@@ -1,4 +1,4 @@
-package com.vaitls.movies;
+package com.vaitls.movies.ui;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -23,7 +23,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.vaitls.movies.MovieListType;
+import com.vaitls.movies.R;
 import com.vaitls.movies.data.Contract;
+import com.vaitls.movies.data.GenreNameMapper;
+import com.vaitls.movies.data.TrailerLoader;
 
 import static com.vaitls.movies.data.Contract.Favorites;
 
@@ -210,10 +214,16 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
 
     class DetailsAdapter extends RecyclerViewCursorAdapter<DetailsHolder> {
 
+        /**
+         * Ugly hack. Normally load trailers on a scrollstate settled. That doesn't happen
+         * for the first holder that comes up, so...
+         */
+        boolean bFirstHolder = true;
+
+
         public DetailsAdapter(Context context, Cursor cursor) {
             super(context, cursor);
         }
-
 
         @Override
         public DetailsHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -233,24 +243,20 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             super.onViewDetachedFromWindow(holder);
             holder.cancelLoaders();
         }
-        /**
-         * Ugly hack. Normally load trailers on a scrollstate settled. That doesn't happen
-         * for the first holder that comes up, so...
-         */
-        boolean bFirstHolder=true;
+
         @Override
         public void onViewAttachedToWindow(DetailsHolder holder) {
             super.onViewAttachedToWindow(holder);
-            if(bFirstHolder) {
+            if (bFirstHolder) {
                 holder.loadTrailers();
-                bFirstHolder=false;
+                bFirstHolder = false;
             }
         }
     }
 
 
-    class DetailsHolder extends RecyclerView.ViewHolder implements View.OnClickListener ,
-    TrailerLoader.TrailerCallback{
+    class DetailsHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
+        TrailerLoader.TrailerCallback {
         private final int LOADER_FAVORITES = 1;
         private final int LOADER_REVIEWS = 2;
         private final int LOADER_TRAILERS = 3;
@@ -263,6 +269,8 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
         private TextView mGenresTextView;
         private int mMid;
         private boolean mFavorite;
+        private TrailerLoader mTrailerLoader;
+        private boolean mHaveTrailers;
 
         public DetailsHolder(View v) {
             super(v);
@@ -276,7 +284,6 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             mThumbnail = (ImageView) v.findViewById(R.id.fragment_details_thubnail_image_view);
             mGenresTextView = (TextView) v.findViewById(R.id.fragment_details_genre_text_view);
         }
-
 
         /**
          * Sets the favorite image and updates the database with an insert.
@@ -306,45 +313,46 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             }.execute();
         }
 
-        private TrailerLoader mTrailerLoader;
-        private boolean mHaveTrailers;
         /**
          * Called to set the trailers and reviews.
          */
         void loadTrailers() {
-            Log.d(TAG,"load trailers");
-            if(mTrailerLoader==null && !mHaveTrailers){
-                mTrailerLoader=new TrailerLoader(getContext(), mMid, this);
+            Log.d(TAG, "load trailers");
+            if (mTrailerLoader == null && !mHaveTrailers) {
+                mTrailerLoader = new TrailerLoader(getContext(), mMid, this);
             }
         }
-        public void onTrailersLoaded(Cursor cursor){
-            mTrailerLoader=null;
-            mHaveTrailers=true;
-            Log.d(TAG,"maybe we have trailers...");
-            if(cursor==null){
+
+        public void onTrailersLoaded(Cursor cursor) {
+            mTrailerLoader = null;
+            mHaveTrailers = true;
+            Log.d(TAG, "maybe we have trailers...");
+            if (cursor == null) {
                 return;
             }
-            if(cursor.getCount()==0){
+            if (cursor.getCount() == 0) {
                 cursor.close();
                 return;
             }
             // Create and insert some buttons dynamically?
             cursor.moveToFirst();
-            while(!cursor.isAfterLast()){
-                Log.d(TAG,"trailer: "+cursor.getString(Contract.Videos.IDX.NAME));
+            while (!cursor.isAfterLast()) {
+                Log.d(TAG, "trailer: " + cursor.getString(Contract.Videos.IDX.NAME));
                 cursor.moveToNext();
             }
             cursor.close();
         }
+
         /*
 
          */
         private void cancelLoaders() {
-            Log.d(TAG,"cancelLoaders");
-            if(mTrailerLoader!=null){
+            Log.d(TAG, "cancelLoaders");
+            if (mTrailerLoader != null) {
                 // I don't know you. You don't know me. Go away.
-                mTrailerLoader.cancel();;
-                mTrailerLoader=null;
+                mTrailerLoader.cancel();
+                ;
+                mTrailerLoader = null;
             }
         }
 
@@ -354,7 +362,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
              the colmuns are stable between tables (TopRated.IDX.RANK==Popular.IDX.RANK).
              */
             cancelLoaders();
-            mHaveTrailers=false;
+            mHaveTrailers = false;
             mFavorite = cursor.getInt(Favorites.IDX.FAVORITE) == 1;
             mMid = cursor.getInt(Favorites.IDX.MID);
             mDateTextView.setText(cursor.getString(Favorites.IDX.RELEASE_DATE));

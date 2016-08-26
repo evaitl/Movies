@@ -1,4 +1,4 @@
-package com.vaitls.movies;
+package com.vaitls.movies.ui;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -20,6 +20,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.vaitls.movies.MovieListType;
+import com.vaitls.movies.R;
 import com.vaitls.movies.data.Contract;
 
 import static com.vaitls.movies.data.Contract.Movies;
