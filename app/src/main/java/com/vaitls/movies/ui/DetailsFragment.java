@@ -27,8 +27,6 @@ import com.vaitls.movies.MovieListType;
 import com.vaitls.movies.R;
 import com.vaitls.movies.data.Contract;
 import com.vaitls.movies.data.GenreNameMapper;
-import com.vaitls.movies.data.ReviewLoader;
-import com.vaitls.movies.data.TrailerLoader;
 
 import static com.vaitls.movies.data.Contract.Favorites;
 
@@ -202,9 +200,6 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
                  */
                 DetailsHolder h = (DetailsHolder) recyclerView.findViewHolderForLayoutPosition(
                     mIndex);
-                if (h != null) {
-                    h.loadTrailers();
-                }
             }
             if (newState == RecyclerView.SCROLL_STATE_DRAGGING ||
                 newState == RecyclerView.SCROLL_STATE_SETTLING) {
@@ -242,22 +237,19 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
         @Override
         public void onViewDetachedFromWindow(DetailsHolder holder) {
             super.onViewDetachedFromWindow(holder);
-            holder.cancelLoaders();
         }
 
         @Override
         public void onViewAttachedToWindow(DetailsHolder holder) {
             super.onViewAttachedToWindow(holder);
             if (bFirstHolder) {
-                holder.loadTrailers();
                 bFirstHolder = false;
             }
         }
     }
 
 
-    class DetailsHolder extends RecyclerView.ViewHolder implements View.OnClickListener,
-        TrailerLoader.TrailerCallback, ReviewLoader.ReviewCallback {
+    class DetailsHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private final int LOADER_FAVORITES = 1;
         private final int LOADER_REVIEWS = 2;
         private final int LOADER_TRAILERS = 3;
@@ -270,10 +262,6 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
         private TextView mGenresTextView;
         private int mMid;
         private boolean mFavorite;
-        private TrailerLoader mTrailerLoader;
-        private ReviewLoader mReviewLoader;
-        private boolean mHaveTrailers;
-        private boolean mHaveReviews;
 
         public DetailsHolder(View v) {
             super(v);
@@ -316,74 +304,11 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             }.execute();
         }
 
-        /**
-         * Called to set the trailers and reviews.
-         */
-        void loadTrailers() {
-            Log.d(TAG, "load trailers");
-            if (mTrailerLoader == null && !mHaveTrailers) {
-                mTrailerLoader = new TrailerLoader(getContext(), mMid, this);
-            }
-            if (mReviewLoader == null && !mHaveReviews) {
-                mReviewLoader = new ReviewLoader(getContext(), mMid, this);
-            }
-        }
-
-        public void onTrailersLoaded(Cursor cursor) {
-            mTrailerLoader = null;
-            mHaveTrailers = true;
-            Log.d(TAG, "maybe we have trailers...");
-            if (cursor == null) {
-                return;
-            }
-            // Create and insert some buttons dynamically?
-            cursor.moveToFirst();
-            while (!cursor.isAfterLast()) {
-                Log.d(TAG, "trailer: " + cursor.getString(Contract.Videos.IDX.NAME));
-                cursor.moveToNext();
-            }
-            cursor.close();
-        }
-
-        public void onReviewsLoaded(Cursor cursor) {
-            mReviewLoader = null;
-            mHaveReviews = true;
-            Log.d(TAG, "We might have reviews");
-            if (cursor == null) {
-                return;
-            }
-            cursor.moveToFirst();
-            while (!cursor.isAfterLast()) {
-                Log.d(TAG, "reviews: " + cursor.getString(Contract.Reviews.IDX.CONTENT));
-                cursor.moveToNext();
-            }
-        }
-
-        /*
-
-         */
-        private void cancelLoaders() {
-            Log.d(TAG, "cancelLoaders");
-            if (mTrailerLoader != null) {
-                // I don't know you. You don't know me. Go away.
-                mTrailerLoader.cancel();
-
-                mTrailerLoader = null;
-            }
-            if (mReviewLoader != null) {
-                mReviewLoader.cancel();
-                mReviewLoader = null;
-            }
-        }
-
         void bind(Cursor cursor) {
             /**
              Counting on using the contract projections and
              the colmuns are stable between tables (TopRated.IDX.RANK==Popular.IDX.RANK).
              */
-            cancelLoaders();
-            mHaveTrailers = false;
-            mHaveReviews = false;
             mFavorite = cursor.getInt(Favorites.IDX.FAVORITE) == 1;
             mMid = cursor.getInt(Favorites.IDX.MID);
             mDateTextView.setText(cursor.getString(Favorites.IDX.RELEASE_DATE));
@@ -416,7 +341,5 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             Log.d(TAG, "clicked");
             setFavoriteImage(mMid, !mFavorite);
         }
-
-
     }
 }

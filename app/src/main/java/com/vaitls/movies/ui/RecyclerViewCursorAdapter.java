@@ -15,8 +15,8 @@ import android.util.Log;
  * @see <a href="https://goo.gl/yAlH3R">this too</a>
  */
 public abstract class RecyclerViewCursorAdapter<VH extends RecyclerView.ViewHolder> extends
-        RecyclerView.Adapter<VH> {
-    private static final String TAG=RecyclerViewCursorAdapter.class.getSimpleName();
+    RecyclerView.Adapter<VH> {
+    private static final String TAG = RecyclerViewCursorAdapter.class.getSimpleName();
     private Context mContext;
     private Cursor mCursor;
     private boolean mDataValid;
@@ -28,7 +28,7 @@ public abstract class RecyclerViewCursorAdapter<VH extends RecyclerView.ViewHold
         mCursor = cursor;
         mDataValid = cursor != null;
         mRowIdColumn = mDataValid ? mCursor.getColumnIndex("_id") : -1;
-        super.setHasStableIds(mRowIdColumn!=-1);
+        super.setHasStableIds(mRowIdColumn != -1);
         mDataSetObserver = new NotifyingDataSetObserver();
         if (mCursor != null) {
             mCursor.registerDataSetObserver(mDataSetObserver);
@@ -75,7 +75,7 @@ public abstract class RecyclerViewCursorAdapter<VH extends RecyclerView.ViewHold
      * closed.
      */
     public void changeCursor(Cursor cursor) {
-        Log.d(TAG,"changeCursor");
+        Log.d(TAG, "changeCursor");
         Cursor old = swapCursor(cursor);
         if (old != null) {
             old.close();
@@ -89,7 +89,7 @@ public abstract class RecyclerViewCursorAdapter<VH extends RecyclerView.ViewHold
      * closed.
      */
     public Cursor swapCursor(Cursor newCursor) {
-        Log.d(TAG,"swapCursor");
+        Log.d(TAG, "swapCursor");
         if (newCursor == mCursor) {
             return null;
         }
@@ -102,12 +102,12 @@ public abstract class RecyclerViewCursorAdapter<VH extends RecyclerView.ViewHold
             if (mDataSetObserver != null) {
                 mCursor.registerDataSetObserver(mDataSetObserver);
             }
-            int oldRowIdColmun=mRowIdColumn;
+            int oldRowIdColmun = mRowIdColumn;
             mRowIdColumn = newCursor.getColumnIndex("_id");
 
 
             mDataValid = true;
-            Log.d(TAG,"calling ndsc");
+            Log.d(TAG, "calling ndsc");
             notifyDataSetChanged();
         } else {
             mRowIdColumn = -1;
@@ -123,13 +123,13 @@ public abstract class RecyclerViewCursorAdapter<VH extends RecyclerView.ViewHold
         @Override
         public void onChanged() {
             mDataValid = true;
-            Log.d(TAG,"NDSO onchanged");
+            Log.d(TAG, "NDSO onchanged");
             notifyDataSetChanged();
         }
 
         @Override
         public void onInvalidated() {
-            Log.d(TAG,"NDSO oninvalidated");
+            Log.d(TAG, "NDSO oninvalidated");
             mDataValid = false;
             notifyDataSetChanged();
             //There is no notifyDataSetInvalidated() method in RecyclerView.Adapter

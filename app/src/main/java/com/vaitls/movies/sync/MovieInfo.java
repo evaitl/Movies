@@ -4,7 +4,7 @@ package com.vaitls.movies.sync;
  * Created by evaitl on 7/30/16.
  * <p/>
  * The fields are created to match the json information in a themoviedb api calls.
- *
+ * <p/>
  * Not all fields are returned with every call, so some will have default values.
  */
 class MovieInfo {
@@ -35,21 +35,22 @@ class MovieInfo {
     private String tagline;
 
     /**
-     * @return Can we put this in the movies db?
-     */
-    boolean isGoodData(){
-        return id>0 &&
-                poster_path !=null &&
-                title !=null &&
-                release_date !=null &&
-                overview !=null &&
-                vote_average >0 &&
-                vote_count>0;
-    }
-    /**
      * Private constructor: Only create these with gson.
      */
     private MovieInfo() {
+    }
+
+    /**
+     * @return Can we put this in the movies db?
+     */
+    boolean isGoodData() {
+        return id > 0 &&
+            poster_path != null &&
+            title != null &&
+            release_date != null &&
+            overview != null &&
+            vote_average > 0 &&
+            vote_count > 0;
     }
 
     public String getImdb_id() {

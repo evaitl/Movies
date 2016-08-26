@@ -125,5 +125,16 @@
             android:layout_weight="1.5"
             android:paddingTop="@dimen/detail_plot_pad_top"
             tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam faucibus elit nectortor varius accumsan. Pellentesque scelerisque arcu at urna varius fermentum. Aenean auctor massa id neque mattis eleifend. Pellentesque posuere dui quam, eu maximus velit"/>
+
+        <Button
+            android:id="@+id/fragment_details_reviews_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/reviews"/>
+        <Button
+            android:id="@+id/fragment_details_videos_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/videos"/>
     </LinearLayout>
 </ScrollView>

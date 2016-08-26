@@ -32,9 +32,8 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
-import static com.vaitls.movies.data.Contract.Movies;
-import static com.vaitls.movies.data.Contract.TopRated;
 import static com.vaitls.movies.data.Contract.Meta;
+import static com.vaitls.movies.data.Contract.TopRated;
 import static java.lang.Math.min;
 
 
@@ -62,14 +61,14 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
 
     public MoviesSyncAdapter(Context context, boolean autoInitialize) {
         super(context, autoInitialize);
-        Log.d(TAG,"constructor");
+        Log.d(TAG, "constructor");
         mContentResolver = context.getContentResolver();
     }
 
     public MoviesSyncAdapter(Context context, boolean autoInitialize,
                              boolean allowParallelSyncs) {
         super(context, autoInitialize, allowParallelSyncs);
-        Log.d(TAG,"construrcture 2");
+        Log.d(TAG, "construrcture 2");
         mContentResolver = context.getContentResolver();
     }
 
@@ -79,12 +78,12 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
      * @param context The context used to access the account service
      */
     public static void syncImmediately(Context context) {
-        Log.d(TAG,"syncImmediately");
+        Log.d(TAG, "syncImmediately");
         Bundle bundle = new Bundle();
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_EXPEDITED, true);
         bundle.putBoolean(ContentResolver.SYNC_EXTRAS_MANUAL, true);
         ContentResolver.requestSync(getSyncAccount(context),
-                context.getString(R.string.content_authority), bundle);
+                                    context.getString(R.string.content_authority), bundle);
     }
 
     /**
@@ -98,11 +97,11 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
     private static Account getSyncAccount(Context context) {
         // Get an instance of the Android account manager
         AccountManager accountManager =
-                (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
+            (AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE);
 
         // Create the account type and default account
         Account newAccount = new Account(
-                context.getString(R.string.app_name), context.getString(R.string.sync_account_type));
+            context.getString(R.string.app_name), context.getString(R.string.sync_account_type));
 
         // If the password doesn't exist, the account doesn't exist
         if (null == accountManager.getPassword(newAccount)) {
@@ -133,9 +132,9 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
         Account account = getSyncAccount(context);
         String authority = context.getString(R.string.content_authority);
         SyncRequest request = new SyncRequest.Builder().
-                syncPeriodic(syncInterval, flexTime).
-                setSyncAdapter(account, authority).
-                setExtras(new Bundle()).build();
+            syncPeriodic(syncInterval, flexTime).
+            setSyncAdapter(account, authority).
+            setExtras(new Bundle()).build();
         ContentResolver.requestSync(request);
     }
 
@@ -148,7 +147,8 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
         /*
          * Without calling setSyncAutomatically, our periodic sync will not be enabled.
          */
-        ContentResolver.setSyncAutomatically(newAccount, context.getString(R.string.content_authority), true);
+        ContentResolver.setSyncAutomatically(newAccount,
+                                             context.getString(R.string.content_authority), true);
 
         /*
          * Finally, let's do a sync to get things started
@@ -164,16 +164,16 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
     private void getDbMeta() {
         Cursor meta = mContentResolver.query(Meta.URI,
                                              Meta.PROJECTION, null, null, null);
-        if (meta != null && meta.getCount()>0){
+        if (meta != null && meta.getCount() > 0) {
             meta.moveToFirst();
             lastPopPage = meta.getInt(Meta.IDX.LAST_POP_PAGE);
             lastTrPage = meta.getInt(Meta.IDX.LAST_TR_PAGE);
             maxPopPage = meta.getInt(Meta.IDX.MAX_POP_PAGE);
             maxTrPage = meta.getInt(Meta.IDX.MAX_TR_PAGE);
-        }else{
-            maxPopPage=maxTrPage=MAX_PAGE;
+        } else {
+            maxPopPage = maxTrPage = MAX_PAGE;
         }
-        if(meta!=null){
+        if (meta != null) {
             meta.close();
         }
         /*
@@ -193,15 +193,15 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
         mContentResolver.insert(Contract.Meta.URI, metaValues);
     }
 
-    private void saveBulk(MoviePage mp, long expires, Uri uri){
-        ContentValues [] values=new ContentValues[mp.getTotal_results()];
-        int i=0;
-        int rank=1+(mp.getPage()-1)*mp.getTotal_results();
-        for(MovieInfo mi: mp.getResults()){
-            if(!mi.isGoodData()){
+    private void saveBulk(MoviePage mp, long expires, Uri uri) {
+        ContentValues[] values = new ContentValues[mp.getTotal_results()];
+        int i = 0;
+        int rank = 1 + (mp.getPage() - 1) * mp.getTotal_results();
+        for (MovieInfo mi : mp.getResults()) {
+            if (!mi.isGoodData()) {
                 continue;
             }
-            values[i++]=Contract.buildBulk()
+            values[i++] = Contract.buildBulk()
                 .putRank(rank++)
                 .putExpires(expires)
                 .putMid(mi.getId())
@@ -214,7 +214,7 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
                 .putGenres(Arrays.toString(mi.getGenre_ids()))
                 .build();
         }
-        mContentResolver.bulkInsert(uri,values);
+        mContentResolver.bulkInsert(uri, values);
     }
 
 
@@ -236,18 +236,18 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
      * Our db will be a bit behind anyhow, so no reason to get picky.
      */
     private void prefetch() {
-        Log.d(TAG,"prefetching...");
+        Log.d(TAG, "prefetching...");
         try {
             int nextPopPage = lastPopPage % maxPopPage + 1;
-            for (int i = 0; i < min(PRECACHE_PAGES,MAX_PAGE); ++i) {
+            for (int i = 0; i < min(PRECACHE_PAGES, MAX_PAGE); ++i) {
                 if (nextPopPage == 0) {
                     nextPopPage = 1;
                 }
-                Log.d(TAG,"pop page "+nextPopPage);
+                Log.d(TAG, "pop page " + nextPopPage);
                 Response<MoviePage> rp =
-                        MovieApi.retrofit.create(MovieApi.class)
-                                .getPage(MovieListType.POPULAR.toString(), sApiKey, nextPopPage)
-                                .execute();
+                    MovieApi.retrofit.create(MovieApi.class)
+                        .getPage(MovieListType.POPULAR.toString(), sApiKey, nextPopPage)
+                        .execute();
                 if (!rp.isSuccessful()) {
                     Log.i(TAG, "Failed fetching pop page " + nextPopPage);
                     break;
@@ -261,19 +261,19 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
                 }
                 MoviePage moviePage = rp.body();
                 maxPopPage = min(moviePage.getTotal_pages(), MAX_PAGE);
-                saveBulk(moviePage,expires,Contract.Popular.URI);
+                saveBulk(moviePage, expires, Contract.Popular.URI);
                 lastPopPage = nextPopPage++;
             }
             int nextTRPage = lastTrPage % maxTrPage + 1;
-            for (int i = 0; i < min(PRECACHE_PAGES,MAX_PAGE); ++i) {
+            for (int i = 0; i < min(PRECACHE_PAGES, MAX_PAGE); ++i) {
                 if (nextTRPage == 0) {
                     nextTRPage = 1;
                 }
-                Log.d(TAG,"tr page "+ nextTRPage);
+                Log.d(TAG, "tr page " + nextTRPage);
                 Response<MoviePage> rp =
-                        MovieApi.retrofit.create(MovieApi.class)
-                                .getPage(MovieListType.TOPRATED.toString(), sApiKey, nextTRPage)
-                                .execute();
+                    MovieApi.retrofit.create(MovieApi.class)
+                        .getPage(MovieListType.TOPRATED.toString(), sApiKey, nextTRPage)
+                        .execute();
                 if (!rp.isSuccessful()) {
                     Log.i(TAG, "Failed fetching TR page " + nextTRPage);
                     break;
@@ -288,7 +288,7 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
                 MoviePage moviePage = rp.body();
                 maxTrPage = min(moviePage.getTotal_pages(), MAX_PAGE);
                 // Assumes each page has the same number of movies.
-                saveBulk(moviePage, expires,TopRated.URI);
+                saveBulk(moviePage, expires, TopRated.URI);
                 lastTrPage = nextTRPage++;
             }
         } catch (IOException e) {
@@ -297,7 +297,8 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
     }
 
     @Override
-    public void onPerformSync(Account account, Bundle extras, String authority, ContentProviderClient provider, SyncResult syncResult) {
+    public void onPerformSync(Account account, Bundle extras, String authority,
+                              ContentProviderClient provider, SyncResult syncResult) {
         Log.i(TAG, "Starting network sync...");
         if (!checkNetwork()) {
             Log.e(TAG, "Can't connect. Bailing on sync");
@@ -311,17 +312,18 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
     /**
      * I think in a real product, we would skip fetching if we are just
      * on the cell network for periodic updates.
-     *
+     * <p/>
      * Perhaps use (activeNetworkInfo.getType() == NetworkInfo.TYPE_WIFI).
+     *
      * @return true if we can get to server.
      */
     private boolean checkNetwork() {
         ConnectivityManager connectivityManager
-                = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         //return activeNetworkInfo != null && activeNetworkInfo.isConnected();
         if (activeNetworkInfo == null || !activeNetworkInfo.isConnected()) {
-            Log.d(TAG,"h3");
+            Log.d(TAG, "h3");
             return false;
         }
      /*   Log.d(TAG,"h1");
@@ -339,9 +341,9 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
      */
     private interface MovieApi {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://api.themoviedb.org/3/movie/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+            .baseUrl("http://api.themoviedb.org/3/movie/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build();
 
         @GET("{type}")
         Call<MoviePage> getPage(@Path("type") String type,

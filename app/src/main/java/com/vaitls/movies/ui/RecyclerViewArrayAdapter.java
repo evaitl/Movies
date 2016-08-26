@@ -1,15 +1,16 @@
 package com.vaitls.movies.ui;
 
 import android.support.v7.widget.RecyclerView;
+
 import java.util.List;
 
 /**
  * Created by evaitl on 8/19/16.
- * <p>
+ * <p/>
  * From <a href="http://goo.gl/jjfvTT">here</a>
  */
 public abstract class RecyclerViewArrayAdapter<T, VH extends RecyclerView.ViewHolder> extends
-        RecyclerView.Adapter<VH> {
+    RecyclerView.Adapter<VH> {
     private List<T> items;
 
     public void bindData(final List<T> items) {
@@ -28,8 +29,8 @@ public abstract class RecyclerViewArrayAdapter<T, VH extends RecyclerView.ViewHo
     @Override
     public int getItemCount() {
         return this.items != null
-                ? this.items.size()
-                : 0;
+            ? this.items.size()
+            : 0;
     }
 
     @Override

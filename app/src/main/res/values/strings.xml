@@ -14,4 +14,6 @@
     <string name="content_authority">com.vaitls.movies.app</string>
     <string name="sync_account_type">com.vaitls.movies.sync</string>
     <string name="genres_label">Genres:</string>
+    <string name="reviews">Reviews</string>
+    <string name="videos">Videos</string>
 </resources>

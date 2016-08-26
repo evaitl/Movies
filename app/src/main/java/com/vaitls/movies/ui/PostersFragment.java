@@ -75,7 +75,7 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Log.d(TAG, "ocl id "+id);
+        Log.d(TAG, "ocl id " + id);
         Uri uri = null;
         if (id == MovieListType.FAVORITE.ordinal()) {
             uri = Contract.Favorites.URI;
@@ -92,13 +92,13 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        Log.d(TAG,"oLR");
+        Log.d(TAG, "oLR");
         mPhotoAdapter.swapCursor(null);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        Log.d(TAG,"olf");
+        Log.d(TAG, "olf");
         mPhotoAdapter.swapCursor(data);
     }
 

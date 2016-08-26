@@ -16,6 +16,7 @@ import android.support.annotation.Nullable;
  */
 public class StubAuthenticatorService extends Service {
     private StubAuthenticator mAuthenticator;
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -24,9 +25,10 @@ public class StubAuthenticatorService extends Service {
 
     @Override
     public void onCreate() {
-        mAuthenticator=new StubAuthenticator(this);
+        mAuthenticator = new StubAuthenticator(this);
     }
-    private static class StubAuthenticator extends AbstractAccountAuthenticator{
+
+    private static class StubAuthenticator extends AbstractAccountAuthenticator {
         public StubAuthenticator(Context context) {
             super(context);
         }
@@ -34,7 +36,7 @@ public class StubAuthenticatorService extends Service {
         @Override
         public Bundle addAccount(AccountAuthenticatorResponse response, String accountType,
                                  String authTokenType, String[] requiredFeatures, Bundle options)
-                throws NetworkErrorException {
+            throws NetworkErrorException {
             return null;
         }
 
@@ -51,7 +53,7 @@ public class StubAuthenticatorService extends Service {
 
         @Override
         public Bundle getAuthToken(AccountAuthenticatorResponse response, Account account, String
-                authTokenType, Bundle options) throws NetworkErrorException {
+            authTokenType, Bundle options) throws NetworkErrorException {
             return null;
         }
 
@@ -69,7 +71,7 @@ public class StubAuthenticatorService extends Service {
         @Override
         public Bundle updateCredentials(AccountAuthenticatorResponse response, Account account,
                                         String authTokenType, Bundle options)
-                throws NetworkErrorException {
+            throws NetworkErrorException {
             return null;
         }
     }

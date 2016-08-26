@@ -22,21 +22,23 @@ public class MovieActivity extends AppCompatActivity {
     private DetailsFragment mDetailsFragment;
 
 
-    void listItemSelected(MovieListType searchOrder, int idx){
-        if(mDetailsFragment==null) {
+    void listItemSelected(MovieListType searchOrder, int idx) {
+        if (mDetailsFragment == null) {
             Intent intent = DetailsActivity.newIntent(getApplicationContext(), searchOrder, idx);
             startActivity(intent);
-        }else{
+        } else {
             mDetailsFragment.setIndex(idx);
         }
     }
-    void detailsItemSelected(int idx){
+
+    void detailsItemSelected(int idx) {
         /*
         if(mPostersFragment){
             TODO  mPostersFragment.setIndex(idx);
         }
         */
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -73,39 +75,41 @@ public class MovieActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        PreferenceManager.setDefaultValues(this,R.xml.settings,false);
+        PreferenceManager.setDefaultValues(this, R.xml.settings, false);
         MoviesSyncAdapter.initializeSyncAdapter(this);
         // main is a resource value based on screen size. It points at
         // either single or two fragment layout.
         setContentView(R.layout.main);
         FragmentManager fm = getSupportFragmentManager();
-        Log.d(TAG,"main "+R.layout.main+" asf "+R.layout.activity_single_fragment+ " atf "+R.layout.activity_two_fragment);
-        Log.d(TAG, "fc: "+findViewById(R.id.fragment_container));
-        Log.d(TAG, "lfc: "+findViewById(R.id.left_fragment_container));
-        if (findViewById(R.id.fragment_container)!=null) { // single fragment
-            Log.d(TAG,"one frag");
+        Log.d(TAG,
+              "main " + R.layout.main + " asf " + R.layout.activity_single_fragment + " atf " + R
+                  .layout.activity_two_fragment);
+        Log.d(TAG, "fc: " + findViewById(R.id.fragment_container));
+        Log.d(TAG, "lfc: " + findViewById(R.id.left_fragment_container));
+        if (findViewById(R.id.fragment_container) != null) { // single fragment
+            Log.d(TAG, "one frag");
             mPostersFragment = (PostersFragment) fm.findFragmentById(R.id.fragment_container);
             if (mPostersFragment == null) {
                 mPostersFragment = PostersFragment.newInstance();
                 fm.beginTransaction()
-                        .add(R.id.fragment_container, mPostersFragment)
-                        .commit();
+                    .add(R.id.fragment_container, mPostersFragment)
+                    .commit();
             }
         } else {
-            Log.d(TAG,"two frags");
+            Log.d(TAG, "two frags");
             mPostersFragment = (PostersFragment) fm.findFragmentById(R.id.left_fragment_container);
             mDetailsFragment = (DetailsFragment) fm.findFragmentById(R.id.right_fragment_container);
             if (mPostersFragment == null) {
                 mPostersFragment = PostersFragment.newInstance();
                 fm.beginTransaction()
-                        .add(R.id.left_fragment_container, mPostersFragment)
-                        .commit();
+                    .add(R.id.left_fragment_container, mPostersFragment)
+                    .commit();
             }
             if (mDetailsFragment == null) {
                 mDetailsFragment = DetailsFragment.newInstance(MovieListType.POPULAR, 0);
                 fm.beginTransaction()
-                        .add(R.id.right_fragment_container, mDetailsFragment)
-                        .commit();
+                    .add(R.id.right_fragment_container, mDetailsFragment)
+                    .commit();
             }
         }
         GenreNameMapper.loadGenres(this);

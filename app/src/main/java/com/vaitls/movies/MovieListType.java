@@ -9,9 +9,11 @@ public enum MovieListType {
     FAVORITE("favorite");
 
     private final String mName;
-    MovieListType(String str){
-        mName=str;
+
+    MovieListType(String str) {
+        mName = str;
     }
+
     @Override
     public String toString() {
         return mName;

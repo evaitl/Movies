@@ -1,10 +1,8 @@
 package com.vaitls.movies.ui;
 
 import android.app.FragmentManager;
-import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 
 import com.vaitls.movies.R;
@@ -20,8 +18,8 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_single_fragment);
         FragmentManager fm = getFragmentManager();
         fm.beginTransaction()
-                .replace(R.id.fragment_container, new SettingsFragment())
-                .commit();
+            .replace(R.id.fragment_container, new SettingsFragment())
+            .commit();
     }
 
     public static class SettingsFragment extends PreferenceFragment {

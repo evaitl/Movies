@@ -21,8 +21,6 @@ import android.net.Uri;
  * interfaces for ContentValues builders appropriate for the various tables.
  */
 public final class Contract {
-    // You don't make new contracts.
-    private Contract(){}
     static final UriMatcher uriMatcher;
     static final String CONTENT_AUTH = "com.vaitls.movies.app";
     static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTH);
@@ -42,7 +40,14 @@ public final class Contract {
         uriMatcher.addURI(CONTENT_AUTH, TableNames.META, MatcherIdxs.META);
     }
 
-    public static VideosBuilder buildVideo(){return new VideosBuilder();}
+    // You don't make new contracts.
+    private Contract() {
+    }
+
+    public static VideosBuilder buildVideo() {
+        return new VideosBuilder();
+    }
+
     public static PopularBuilder buildPopular() {
         return new PopularBuilder();
     }
@@ -54,15 +59,27 @@ public final class Contract {
     public static MoviesBuilder buildMovies() {
         return new MoviesBuilder();
     }
-public static BulkBuilder buildBulk() {return new BulkBuilder();}
+
+    public static BulkBuilder buildBulk() {
+        return new BulkBuilder();
+    }
+
     public static FavoritesBuilder buildFavorites() {
         return new FavoritesBuilder();
     }
-    public static ReviewsBuilder buildReview(){ return new ReviewsBuilder(); }
+
+    public static ReviewsBuilder buildReview() {
+        return new ReviewsBuilder();
+    }
+
     public static GenreNamesBuilder buildGenreNames() {
         return new GenreNamesBuilder();
     }
-    public static MetaBuilder buildMeta() {return new MetaBuilder();}
+
+    public static MetaBuilder buildMeta() {
+        return new MetaBuilder();
+    }
+
     public interface Meta {
         Uri URI =
             BASE_CONTENT_URI.buildUpon().appendPath(TableNames.META).build();
@@ -110,7 +127,7 @@ public static BulkBuilder buildBulk() {return new BulkBuilder();}
             String RELEASE_DATE = "release_date";
             String VOTE_COUNT = "vote_count";
             String VOTE_AVERAGE = "vote_average";
-            String GENRES="genres";
+            String GENRES = "genres";
         }
 
         interface IDX {
@@ -122,7 +139,7 @@ public static BulkBuilder buildBulk() {return new BulkBuilder();}
             int RELEASE_DATE = 5;
             int VOTE_COUNT = 6;
             int VOTE_AVERAGE = 7;
-            int GENRES=8;
+            int GENRES = 8;
         }
     }
 
@@ -266,7 +283,7 @@ public static BulkBuilder buildBulk() {return new BulkBuilder();}
     interface MatcherIdxs {
         int MOVIES = 1;
         int FAVORITES = 2;
-        int META=3;
+        int META = 3;
         int TOPRATED = 4;
         int POPULAR = 5;
         int VIDEOS = 6;
@@ -335,8 +352,9 @@ public static BulkBuilder buildBulk() {return new BulkBuilder();}
             mValues.put(Movies.COLS.VOTE_AVERAGE, voteAverage);
             return this;
         }
-        public MoviesBuilder putGenres(String genres){
-            mValues.put(Movies.COLS.GENRES,genres);
+
+        public MoviesBuilder putGenres(String genres) {
+            mValues.put(Movies.COLS.GENRES, genres);
             return this;
         }
     }
@@ -346,7 +364,8 @@ public static BulkBuilder buildBulk() {return new BulkBuilder();}
             mValues.put(Favorites.COLS.MID, mid);
             return this;
         }
-        public FavoritesBuilder putFavorite(boolean isFavorite){
+
+        public FavoritesBuilder putFavorite(boolean isFavorite) {
             mValues.put(Favorites.COLS.FAVORITE, isFavorite);
             return this;
         }
@@ -368,16 +387,19 @@ public static BulkBuilder buildBulk() {return new BulkBuilder();}
             return this;
         }
     }
-    public static class BulkBuilder extends MoviesBuilder{
-        public BulkBuilder putRank(int rank){
-            mValues.put(TopRated.COLS.RANK,rank);
+
+    public static class BulkBuilder extends MoviesBuilder {
+        public BulkBuilder putRank(int rank) {
+            mValues.put(TopRated.COLS.RANK, rank);
             return this;
         }
-        public BulkBuilder putExpires(long expires){
-            mValues.put(TopRated.COLS.EXPIRES,expires);
+
+        public BulkBuilder putExpires(long expires) {
+            mValues.put(TopRated.COLS.EXPIRES, expires);
             return this;
         }
     }
+
     public static class PopularBuilder extends TopRatedBuilder {
 
     }
@@ -393,72 +415,88 @@ public static BulkBuilder buildBulk() {return new BulkBuilder();}
             return this;
         }
     }
-    public static class MetaBuilder extends Builder{
-        public MetaBuilder putLastPopPage(int lastPopPage){
-            mValues.put(Meta.COLS.LAST_POP_PAGE,lastPopPage);
+
+    public static class MetaBuilder extends Builder {
+        public MetaBuilder putLastPopPage(int lastPopPage) {
+            mValues.put(Meta.COLS.LAST_POP_PAGE, lastPopPage);
             return this;
         }
-        public MetaBuilder putLastTRPage(int lastTRPage){
-            mValues.put(Meta.COLS.LAST_TR_PAGE,lastTRPage);
+
+        public MetaBuilder putLastTRPage(int lastTRPage) {
+            mValues.put(Meta.COLS.LAST_TR_PAGE, lastTRPage);
             return this;
         }
-        public MetaBuilder putMaxPopPage(int maxPopPage ){
-            mValues.put(Meta.COLS.MAX_POP_PAGE,maxPopPage);
+
+        public MetaBuilder putMaxPopPage(int maxPopPage) {
+            mValues.put(Meta.COLS.MAX_POP_PAGE, maxPopPage);
             return this;
         }
-        public MetaBuilder putMaxTRPage(int maxTRPage){
-            mValues.put(Meta.COLS.MAX_TR_PAGE,maxTRPage);
+
+        public MetaBuilder putMaxTRPage(int maxTRPage) {
+            mValues.put(Meta.COLS.MAX_TR_PAGE, maxTRPage);
             return this;
         }
     }
-    public static class VideosBuilder extends Builder{
-        public VideosBuilder putMid (int mid ){
-            mValues.put(Videos.COLS.MID,mid);
+
+    public static class VideosBuilder extends Builder {
+        public VideosBuilder putMid(int mid) {
+            mValues.put(Videos.COLS.MID, mid);
             return this;
         }
-        public VideosBuilder putVid (String  vid){
+
+        public VideosBuilder putVid(String vid) {
             mValues.put(Videos.COLS.VID, vid);
             return this;
         }
-        public VideosBuilder putLang (String lang){
-            mValues.put(Videos.COLS.LANG,lang);
+
+        public VideosBuilder putLang(String lang) {
+            mValues.put(Videos.COLS.LANG, lang);
             return this;
         }
-        public VideosBuilder putName (String name){
-            mValues.put(Videos.COLS.NAME,name);
+
+        public VideosBuilder putName(String name) {
+            mValues.put(Videos.COLS.NAME, name);
             return this;
         }
-        public VideosBuilder putSite (String site){
-            mValues.put(Videos.COLS.SITE,site);
+
+        public VideosBuilder putSite(String site) {
+            mValues.put(Videos.COLS.SITE, site);
             return this;
         }
-        public VideosBuilder putSize (int size ){
-            mValues.put(Videos.COLS.SIZE,size);
+
+        public VideosBuilder putSize(int size) {
+            mValues.put(Videos.COLS.SIZE, size);
             return this;
         }
-        public VideosBuilder putKey (String key){
-            mValues.put(Videos.COLS.KEY,key);
+
+        public VideosBuilder putKey(String key) {
+            mValues.put(Videos.COLS.KEY, key);
             return this;
         }
     }
-    public static class ReviewsBuilder extends Builder{
-        public ReviewsBuilder putMid (int mid){
-            mValues.put(Reviews.COLS.MID,mid);
+
+    public static class ReviewsBuilder extends Builder {
+        public ReviewsBuilder putMid(int mid) {
+            mValues.put(Reviews.COLS.MID, mid);
             return this;
         }
-        public ReviewsBuilder putRid (String rid ){
-            mValues.put(Reviews.COLS.RID,rid );
+
+        public ReviewsBuilder putRid(String rid) {
+            mValues.put(Reviews.COLS.RID, rid);
             return this;
         }
-        public ReviewsBuilder putAuthor (String author){
-            mValues.put(Reviews.COLS.AUTHOR, author );
+
+        public ReviewsBuilder putAuthor(String author) {
+            mValues.put(Reviews.COLS.AUTHOR, author);
             return this;
         }
-        public ReviewsBuilder putContent (String content){
-            mValues.put(Reviews.COLS.CONTENT, content );
+
+        public ReviewsBuilder putContent(String content) {
+            mValues.put(Reviews.COLS.CONTENT, content);
             return this;
         }
-        public ReviewsBuilder putUrl (String url){
+
+        public ReviewsBuilder putUrl(String url) {
             mValues.put(Reviews.COLS.URL, url);
             return this;
         }

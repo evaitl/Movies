@@ -39,7 +39,7 @@ class MovieDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        onUpgrade(db,oldVersion,newVersion);
+        onUpgrade(db, oldVersion, newVersion);
     }
 
     @Override
@@ -56,9 +56,9 @@ class MovieDBHelper extends SQLiteOpenHelper {
                 "poster_path text not null," +
                 "release_date text not null," +
                 "vote_count integer not null," +
-                "vote_average real not null,"+
+                "vote_average real not null," +
 
-                "genres text not null"+
+                "genres text not null" +
                 ");");
 
         db.execSQL(
@@ -69,17 +69,17 @@ class MovieDBHelper extends SQLiteOpenHelper {
                 ");");
 
 /**
-I feel bad about this. By all SQL theory, we should have a genres table and do a join,
-but it is just too much work for the payback. Instead I'm putting the genre ids
-in a text column in the movies table. When we look at a movies row,
+ I feel bad about this. By all SQL theory, we should have a genres table and do a join,
+ but it is just too much work for the payback. Instead I'm putting the genre ids
+ in a text column in the movies table. When we look at a movies row,
  we'll convert the ids to strings from the genre_names table.
 
-        // genre/movie/list
-        db.execSQL("create table genres(" +
-                       "_id integer primary key autoincrement," +
-                       "mid integer not null," +
-                       "gid integer not null);");
-*/
+ // genre/movie/list
+ db.execSQL("create table genres(" +
+ "_id integer primary key autoincrement," +
+ "mid integer not null," +
+ "gid integer not null);");
+ */
 
         // movie/top_rated?page=XXX
         db.execSQL(
@@ -150,7 +150,6 @@ NBD.
                 "last_pop_page integer not null, " +
                 "max_pop_page integer not null" +
                 ");");
-
 
 
     }

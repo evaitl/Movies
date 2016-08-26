@@ -1,6 +1,7 @@
 package com.vaitls.movies.data;
 
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.os.AsyncTask;
@@ -22,10 +23,10 @@ import static com.vaitls.movies.data.Contract.Videos;
 
 /**
  * Created by evaitl on 8/25/16.
- *
+ * <p/>
  * This thing will try to fetch and cache any trailers associated with movie mid.
  * If they are already cached, skip the fetch.
- *
+ * <p/>
  * When it has something (or nothing), it will call a callback with a cursor (or maybe null).
  * Shit happens.
  */
@@ -54,31 +55,34 @@ public final class TrailerLoader {
                 if (c != null && c.getCount() != 0) {
                     return c;
                 }
-                if(c!=null){
-                    c.close();;
+                if (c != null) {
+                    c.close();
+                    ;
                 }
                 Response<Trailers> rp = null;
                 try {
                     rp = TrailersApi.retrofit.create(TrailersApi.class)
                         .getTrailers(mMid, mApiKey).execute();
                 } catch (IOException e) {
-                    Log.e(TAG, "Error loading trailers: " + mid,e);
+                    Log.e(TAG, "Error loading trailers: " + mid, e);
                 }
                 if (rp == null) {
                     return null;
                 }
+                ContentValues[] cv = new ContentValues[rp.body().getResults().length];
+                int i = 0;
                 for (Trailer t : rp.body().getResults()) {
-                    resolver.insert(Videos.URI,
-                                    Contract.buildVideo()
-                                        .putMid(mid)
-                                        .putKey(t.getKey())
-                                        .putLang(t.getIso_639_1())
-                                        .putName(t.getName())
-                                        .putSite(t.getSite())
-                                        .putSize(t.getSize())
-                                        .putVid(t.getId())
-                                        .build());
+                    cv[i++] = Contract.buildVideo()
+                        .putMid(mid)
+                        .putKey(t.getKey())
+                        .putLang(t.getIso_639_1())
+                        .putName(t.getName())
+                        .putSite(t.getSite())
+                        .putSize(t.getSize())
+                        .putVid(t.getId())
+                        .build();
                 }
+                resolver.bulkInsert(Videos.URI, cv);
                 return resolver.query(Videos.URI, Videos.PROJECTION, "mid = ?", selectionArgs,
                                       null);
             }

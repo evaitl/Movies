@@ -1,10 +1,8 @@
 package com.vaitls.movies.sync;
 
-import com.vaitls.movies.sync.MovieInfo;
-
 /**
  * Created by evaitl on 7/30/16.
- *
+ * <p/>
  * The fields are created to match the json information in a themoviedb api call.
  */
 class MoviePage {
@@ -16,7 +14,9 @@ class MoviePage {
     /**
      * Private constructor:  Only create these with gson.
      */
-    private MoviePage(){}
+    private MoviePage() {
+    }
+
     // Generated getters.
     public int getPage() {
         return page;
