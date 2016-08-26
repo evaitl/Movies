@@ -233,7 +233,19 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             super.onViewDetachedFromWindow(holder);
             holder.cancelLoaders();
         }
-
+        /**
+         * Ugly hack. Normally load trailers on a scrollstate settled. That doesn't happen
+         * for the first holder that comes up, so...
+         */
+        boolean bFirstHolder=true;
+        @Override
+        public void onViewAttachedToWindow(DetailsHolder holder) {
+            super.onViewAttachedToWindow(holder);
+            if(bFirstHolder) {
+                holder.loadTrailers();
+                bFirstHolder=false;
+            }
+        }
     }
 
 
@@ -294,18 +306,20 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             }.execute();
         }
 
-        TrailerLoader mTrailerLoader;
+        private TrailerLoader mTrailerLoader;
+        private boolean mHaveTrailers;
         /**
          * Called to set the trailers and reviews.
          */
         void loadTrailers() {
             Log.d(TAG,"load trailers");
-            if(mTrailerLoader==null){
+            if(mTrailerLoader==null && !mHaveTrailers){
                 mTrailerLoader=new TrailerLoader(getContext(), mMid, this);
-
             }
         }
         public void onTrailersLoaded(Cursor cursor){
+            mTrailerLoader=null;
+            mHaveTrailers=true;
             Log.d(TAG,"maybe we have trailers...");
             if(cursor==null){
                 return;
@@ -339,6 +353,8 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
              Counting on using the contract projections and
              the colmuns are stable between tables (TopRated.IDX.RANK==Popular.IDX.RANK).
              */
+            cancelLoaders();
+            mHaveTrailers=false;
             mFavorite = cursor.getInt(Favorites.IDX.FAVORITE) == 1;
             mMid = cursor.getInt(Favorites.IDX.MID);
             mDateTextView.setText(cursor.getString(Favorites.IDX.RELEASE_DATE));
