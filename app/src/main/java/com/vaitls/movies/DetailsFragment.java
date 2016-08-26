@@ -79,7 +79,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
 
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
-        Log.d(TAG,"olr");
+        Log.d(TAG, "olr");
         mDetailsAdapter.swapCursor(null);
     }
 
@@ -87,18 +87,18 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
      * When I'm browsing the favorites list, I hate having the view I'm looking at
      * disappear as soon as I touch the star. Instead, we turn off the star
      * by setting favorite to false and put that in the db.
-     *
+     * <p/>
      * In onPause or when changing away from the favorite list, I preen out the
      * no-longer favorites from the favorites list.
-     *
+     * <p/>
      * Do this in an asynctask. No db in UI thread.
      */
-    private void preenFavorites(){
-        Log.d(TAG,"preening Favorits");
-        new AsyncTask<Void,Void,Void>(){
+    private void preenFavorites() {
+        Log.d(TAG, "preening Favorits");
+        new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                getContext().getContentResolver().delete(Favorites.URI,"favorite = 0",null);
+                getContext().getContentResolver().delete(Favorites.URI, "favorite = 0", null);
                 return null;
             }
         }.execute();
@@ -107,26 +107,26 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
     @Override
     public void onPause() {
         super.onPause();
-        if(mSearchOrder==MovieListType.FAVORITE){
+        if (mSearchOrder == MovieListType.FAVORITE) {
             preenFavorites();
         }
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        Log.d(TAG,"olf");
+        Log.d(TAG, "olf");
         mDetailsAdapter.swapCursor(data);
         setIndex(mIndex);
     }
 
     void setSearchOrder(MovieListType searchOrder) {
         if (mSearchOrder != searchOrder) {
-            if(mSearchOrder==MovieListType.FAVORITE){
+            if (mSearchOrder == MovieListType.FAVORITE) {
                 preenFavorites();
             }
             mSearchOrder = searchOrder;
             mIndex = 0;
-            Log.d(TAG,"init loader this-- setSearchOrder");
+            Log.d(TAG, "init loader this-- setSearchOrder");
             getLoaderManager().initLoader(mSearchOrder.ordinal(), null, this);
         }
     }
@@ -160,7 +160,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
         }
         mIndex = bundle.getInt(ARG_IDX, 0);
         mDetailsAdapter = new DetailsAdapter(getContext(), null);
-        Log.d(TAG,"initLoader this -- onCreate");
+        Log.d(TAG, "initLoader this -- onCreate");
         getLoaderManager().initLoader(mSearchOrder.ordinal(), null, this);
         Log.d(TAG, "df onCreate");
     }
@@ -174,7 +174,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
 
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-            Log.d(TAG,"ossc: "+ newState+ "mSettling " +mSettling);
+            Log.d(TAG, "ossc: " + newState + "mSettling " + mSettling);
             LinearLayoutManager lm = (LinearLayoutManager) recyclerView.getLayoutManager();
             if (!mSettling && newState == RecyclerView.SCROLL_STATE_IDLE) {
 
@@ -237,7 +237,8 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
     }
 
 
-    class DetailsHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class DetailsHolder extends RecyclerView.ViewHolder implements View.OnClickListener ,
+    TrailerLoader.TrailerCallback{
         private final int LOADER_FAVORITES = 1;
         private final int LOADER_REVIEWS = 2;
         private final int LOADER_TRAILERS = 3;
@@ -261,12 +262,13 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             mFavoriteButton.setOnClickListener(this);
             mPlotTextView = (TextView) v.findViewById(R.id.fragment_details_plot_text_view);
             mThumbnail = (ImageView) v.findViewById(R.id.fragment_details_thubnail_image_view);
-            mGenresTextView=(TextView)v.findViewById(R.id.fragment_details_genre_text_view);
+            mGenresTextView = (TextView) v.findViewById(R.id.fragment_details_genre_text_view);
         }
 
 
         /**
          * Sets the favorite image and updates the database with an insert.
+         *
          * @param mid
          * @param set
          */
@@ -275,10 +277,10 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
                 ContextCompat.getDrawable(getContext(),
                                           set ? R.drawable.ic_gold_star
                                               : R.drawable.ic_black_star));
-            if(mFavorite==set){
+            if (mFavorite == set) {
                 return;
             }
-            mFavorite=set;
+            mFavorite = set;
             new AsyncTask<Void, Void, Void>() {
                 @Override
                 protected Void doInBackground(Void... params) {
@@ -292,18 +294,44 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             }.execute();
         }
 
+        TrailerLoader mTrailerLoader;
         /**
          * Called to set the trailers and reviews.
          */
         void loadTrailers() {
+            Log.d(TAG,"load trailers");
+            if(mTrailerLoader==null){
+                mTrailerLoader=new TrailerLoader(getContext(), mMid, this);
 
+            }
         }
-
+        public void onTrailersLoaded(Cursor cursor){
+            Log.d(TAG,"maybe we have trailers...");
+            if(cursor==null){
+                return;
+            }
+            if(cursor.getCount()==0){
+                cursor.close();
+                return;
+            }
+            // Create and insert some buttons dynamically?
+            cursor.moveToFirst();
+            while(!cursor.isAfterLast()){
+                Log.d(TAG,"trailer: "+cursor.getString(Contract.Videos.IDX.NAME));
+                cursor.moveToNext();
+            }
+            cursor.close();
+        }
         /*
 
          */
         private void cancelLoaders() {
-
+            Log.d(TAG,"cancelLoaders");
+            if(mTrailerLoader!=null){
+                // I don't know you. You don't know me. Go away.
+                mTrailerLoader.cancel();;
+                mTrailerLoader=null;
+            }
         }
 
         void bind(Cursor cursor) {
@@ -319,7 +347,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
                                                   cursor.getFloat(Favorites.IDX.VOTE_AVERAGE)));
             mTitleTextView.setText(cursor.getString(Favorites.IDX.TITLE));
             mGenresTextView.setText(GenreNameMapper.map(cursor.getString(Favorites.IDX.GENRES)));
-            setFavoriteImage(mMid,mFavorite);
+            setFavoriteImage(mMid, mFavorite);
 
 
             String uri = "http://image.tmdb.org/t/p/w185" +
@@ -341,7 +369,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
         @Override
         public void onClick(View v) {
             Log.d(TAG, "clicked");
-            setFavoriteImage(mMid,!mFavorite);
+            setFavoriteImage(mMid, !mFavorite);
         }
 
 

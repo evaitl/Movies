@@ -4,4 +4,7 @@
     android:title="@string/list_order"
     android:defaultValue="@string/popularity_order"
     />
+    <CheckBoxPreference
+        android:title=""
+        />
 </PreferenceScreen>

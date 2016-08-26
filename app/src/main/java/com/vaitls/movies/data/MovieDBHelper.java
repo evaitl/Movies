@@ -13,7 +13,7 @@ import android.util.Log;
 class MovieDBHelper extends SQLiteOpenHelper {
     private static final String TAG = MovieDBHelper.class.getSimpleName();
     private static final String DATABASE_NAME = "movies.db";
-    private static final int DATABASE_VERSION = 856;
+    private static final int DATABASE_VERSION = 4;
 
     public MovieDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -35,6 +35,11 @@ class MovieDBHelper extends SQLiteOpenHelper {
             db.execSQL("drop table if exists meta;");
             onCreate(db);
         }
+    }
+
+    @Override
+    public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        onUpgrade(db,oldVersion,newVersion);
     }
 
     @Override
@@ -105,7 +110,7 @@ NBD.
         db.execSQL("create table videos(" +
                        "_id integer primary key autoincrement," +
                        "mid integer not null," +
-                       "id text not null," +
+                       "vid text not null," +
                        "iso_639_1 text not null," +
                        "name text not null," +
                        "site text not null," +

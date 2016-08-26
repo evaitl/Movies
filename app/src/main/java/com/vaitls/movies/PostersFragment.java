@@ -77,6 +77,7 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
         Uri uri = null;
         if (id == MovieListType.FAVORITE.ordinal()) {
             uri = Contract.Favorites.URI;
+
         } else if (id == MovieListType.POPULAR.ordinal()) {
             uri = Contract.Popular.URI;
         } else if (id == MovieListType.TOPRATED.ordinal()) {

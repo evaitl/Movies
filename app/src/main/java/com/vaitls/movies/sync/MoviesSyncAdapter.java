@@ -46,9 +46,9 @@ import static java.lang.Math.min;
  */
 public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
     private static final String TAG = MoviesSyncAdapter.class.getSimpleName();
-    private static final int PRECACHE_PAGES = 10;
+    private static final int PRECACHE_PAGES = 5;
     // TODO 100
-    private static final int MAX_PAGE = 10;
+    private static final int MAX_PAGE = 50;
     // Every 6 hours.
     private static final int SYNC_INTERVAL = 60 * 60 * 6;
     // More or less....
@@ -253,8 +253,7 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
         Log.d(TAG,"prefetching...");
         try {
             int nextPopPage = lastPopPage % maxPopPage + 1;
-            for (int i = 0; i < PRECACHE_PAGES; ++i) {
-
+            for (int i = 0; i < min(PRECACHE_PAGES,MAX_PAGE); ++i) {
                 if (nextPopPage == 0) {
                     nextPopPage = 1;
                 }
@@ -284,7 +283,7 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
                 lastPopPage = nextPopPage++;
             }
             int nextTRPage = lastTrPage % maxTrPage + 1;
-            for (int i = 0; i < PRECACHE_PAGES; ++i) {
+            for (int i = 0; i < min(PRECACHE_PAGES,MAX_PAGE); ++i) {
                 if (nextTRPage == 0) {
                     nextTRPage = 1;
                 }

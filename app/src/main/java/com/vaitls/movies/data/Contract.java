@@ -42,6 +42,7 @@ public final class Contract {
         uriMatcher.addURI(CONTENT_AUTH, TableNames.META, MatcherIdxs.META);
     }
 
+    public static VideosBuilder buildVideo(){return new VideosBuilder();}
     public static PopularBuilder buildPopular() {
         return new PopularBuilder();
     }
@@ -211,14 +212,14 @@ public final class Contract {
         Uri URI =
             BASE_CONTENT_URI.buildUpon().appendPath(TableNames.VIDEOS).build();
         String[] PROJECTION = {
-            COLS._ID, COLS.MID, COLS.ID, COLS.LANG,
+            COLS._ID, COLS.MID, COLS.VID, COLS.LANG,
             COLS.NAME, COLS.SITE, COLS.KEY, COLS.SIZE,
         };
 
         interface COLS {
             String _ID = "_id";
             String MID = "mid";
-            String ID = "id";
+            String VID = "vid";
             String LANG = "iso_639_1";
             String NAME = "name";
             String SITE = "site";
@@ -229,7 +230,7 @@ public final class Contract {
         interface IDX {
             int _ID = 0;
             int MID = 1;
-            int ID = 2;
+            int VID = 2;
             int LANG = 3;
             int NAME = 4;
             int SITE = 5;
@@ -398,6 +399,36 @@ public final class Contract {
         }
         public MetaBuilder putMaxTRPage(int maxTRPage){
             mValues.put(Meta.COLS.MAX_TR_PAGE,maxTRPage);
+            return this;
+        }
+    }
+    public static class VideosBuilder extends Builder{
+        public VideosBuilder putMid (int mid ){
+            mValues.put(Videos.COLS.MID,mid);
+            return this;
+        }
+        public VideosBuilder putVid (String  vid){
+            mValues.put(Videos.COLS.VID, vid);
+            return this;
+        }
+        public VideosBuilder putLang (String lang){
+            mValues.put(Videos.COLS.LANG,lang);
+            return this;
+        }
+        public VideosBuilder putName (String name){
+            mValues.put(Videos.COLS.NAME,name);
+            return this;
+        }
+        public VideosBuilder putSite (String site){
+            mValues.put(Videos.COLS.SITE,site);
+            return this;
+        }
+        public VideosBuilder putSize (int size ){
+            mValues.put(Videos.COLS.SIZE,size);
+            return this;
+        }
+        public VideosBuilder putKey (String key){
+            mValues.put(Videos.COLS.KEY,key);
             return this;
         }
     }
