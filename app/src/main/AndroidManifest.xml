@@ -19,6 +19,7 @@
         android:theme="@style/AppTheme">
         <activity android:name=".ui.DetailsActivity"/>
         <activity android:name=".ui.ReviewsActivity"/>
+        <activity android:name=".ui.TrailersActivity"/>
         <provider
             android:name=".data.MovieProvider"
             android:authorities="@string/content_authority"

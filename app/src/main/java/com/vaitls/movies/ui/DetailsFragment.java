@@ -278,8 +278,8 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             mPlotTextView = (TextView) v.findViewById(R.id.fragment_details_plot_text_view);
             mThumbnail = (ImageView) v.findViewById(R.id.fragment_details_thubnail_image_view);
             mGenresTextView = (TextView) v.findViewById(R.id.fragment_details_genre_text_view);
-            mReviewsButton=(Button) v.findViewById(R.id.fragment_details_reviews_button);
-            mVideosButton=(Button) v.findViewById(R.id.fragment_details_videos_button);
+            mReviewsButton = (Button) v.findViewById(R.id.fragment_details_reviews_button);
+            mVideosButton = (Button) v.findViewById(R.id.fragment_details_videos_button);
         }
 
         /**
@@ -327,8 +327,15 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             mReviewsButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.d(TAG,"onClick Reviews");
-                    Intent intent=ReviewsActivity.newIntent(getContext(), mMid);
+                    Log.d(TAG, "onClick Reviews");
+                    Intent intent = ReviewsActivity.newIntent(getContext(), mMid);
+                    startActivity(intent);
+                }
+            });
+            mVideosButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = TrailersActivity.newIntent(getContext(), mMid);
                     startActivity(intent);
                 }
             });
