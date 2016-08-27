@@ -65,10 +65,12 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
         Log.d(TAG, "onCreateView");
         View v = inflater.inflate(R.layout.recycler_view, container, false);
         mPostersRecylerView = (RecyclerView) v.findViewById(R.id.full_page_recycler_view);
-        int columns = getResources().getInteger(R.integer.columns);
+
         Log.d(TAG, "setting adapter to " + mPhotoAdapter);
         mPostersRecylerView.setAdapter(mPhotoAdapter);
-        mPostersRecylerView.setLayoutManager(new GridLayoutManager(getActivity(), columns));
+        float density=getResources().getDisplayMetrics().density;
+        int xxx=(int)(100*density);
+        mPostersRecylerView.setLayoutManager(new GridAutofitLayoutManager(getActivity(), xxx));
         mPostersRecylerView.setHasFixedSize(true);
         return v;
     }

@@ -57,7 +57,6 @@ public final class TrailerLoader {
                 }
                 if (c != null) {
                     c.close();
-                    ;
                 }
                 Response<Trailers> rp = null;
                 try {

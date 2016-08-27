@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
 
 import com.vaitls.movies.R;
 import com.vaitls.movies.data.ReviewLoader;
@@ -34,16 +35,25 @@ public class ReviewsActivity extends ListActivity implements ReviewLoader.Review
         Log.d(TAG, "onCreate");
         super.onCreate(savedInstanceState);
         mMid = getIntent().getIntExtra(EXTRA_MID, 0);
+        getListView().setEmptyView(findViewById(R.id.no_reviews_text_view));
         String[] cnames = {Reviews.COLS.AUTHOR, Reviews.COLS.CONTENT};
         int[] views = {R.id.review_item_author_text_view, R.id.review_item_content_text_view};
         mAdapter = new SimpleCursorAdapter(this, R.layout.review_item, null, cnames, views, 0);
         setListAdapter(mAdapter);
         mReviewLoader = new ReviewLoader(this, mMid, this);
+
     }
 
     @Override
     public void onReviewsLoaded(Cursor cursor) {
         mReviewLoader = null;
+        if(cursor==null || cursor.getCount()==0){
+            Toast.makeText(getApplicationContext(),
+                           R.string.no_reviews_avail,Toast.LENGTH_LONG).show();
+            Log.i(TAG,"No reviews.");
+        }else {
+            Log.d(TAG, "reviews: " + cursor.getCount());
+        }
         mAdapter.swapCursor(cursor);
     }
 

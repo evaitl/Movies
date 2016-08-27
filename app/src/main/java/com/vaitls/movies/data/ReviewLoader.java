@@ -63,6 +63,10 @@ public final class ReviewLoader {
                     return null;
                 }
                 ContentValues[] cv = new ContentValues[rp.body().getResults().length];
+                if(cv.length==0){
+                    Log.e(TAG,"no reviews of "+mid);
+                    return null;
+                }
                 int i = 0;
                 for (TMDReview r : rp.body().getResults()) {
                     cv[i++] = Contract.buildReview()

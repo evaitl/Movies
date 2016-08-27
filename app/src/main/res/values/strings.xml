@@ -19,4 +19,6 @@
     <string name="author_label">Author:</string>
     <string name="url_label">Url:</string>
     <string name="review_label">Review:</string>
+    <string name="no_reviews_avail">No reviews available</string>
+    <string name="no_trailers_avail">No trailers available</string>
 </resources>

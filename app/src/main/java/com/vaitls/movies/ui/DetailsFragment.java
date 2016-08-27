@@ -30,6 +30,8 @@ import com.vaitls.movies.R;
 import com.vaitls.movies.data.Contract;
 import com.vaitls.movies.data.GenreNameMapper;
 
+import java.util.Locale;
+
 import static com.vaitls.movies.data.Contract.Favorites;
 
 /**
@@ -319,8 +321,9 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             mMid = cursor.getInt(Favorites.IDX.MID);
             mDateTextView.setText(cursor.getString(Favorites.IDX.RELEASE_DATE));
             mPlotTextView.setText(cursor.getString(Favorites.IDX.PLOT));
-            mRatingTextView.setText(String.format("%.2f",
-                                                  cursor.getFloat(Favorites.IDX.VOTE_AVERAGE)));
+            mRatingTextView.setText(String.format(new Locale("en"),
+                                                  "%.2f",
+                                                   cursor.getFloat(Favorites.IDX.VOTE_AVERAGE)));
             mTitleTextView.setText(cursor.getString(Favorites.IDX.TITLE));
             mGenresTextView.setText(GenreNameMapper.map(cursor.getString(Favorites.IDX.GENRES)));
             setFavoriteImage(mMid, mFavorite);
