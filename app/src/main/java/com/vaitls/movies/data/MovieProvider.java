@@ -49,19 +49,25 @@ public class MovieProvider extends ContentProvider {
      */
     private int listInsertHelper(String tableName, Uri uri, ContentValues[] values) {
         ContentValues listValues;
-        for (ContentValues v : values) {
-            if (v == null) {
-                continue;
+        db.beginTransaction();
+        try {
+            for (ContentValues v : values) {
+                if (v == null) {
+                    continue;
+                }
+                listValues = Contract.buildTopRated()
+                    .putExpires(v.getAsLong(TopRated.COLS.EXPIRES))
+                    .putMid(v.getAsInteger(TopRated.COLS.MID))
+                    .putRank(v.getAsInteger(TopRated.COLS.RANK))
+                    .build();
+                v.remove(TopRated.COLS.EXPIRES);
+                v.remove(TopRated.COLS.RANK);
+                db.insert(Contract.TableNames.MOVIES, null, v);
+                db.insert(tableName, null, listValues);
             }
-            listValues = Contract.buildTopRated()
-                .putExpires(v.getAsLong(TopRated.COLS.EXPIRES))
-                .putMid(v.getAsInteger(TopRated.COLS.MID))
-                .putRank(v.getAsInteger(TopRated.COLS.RANK))
-                .build();
-            v.remove(TopRated.COLS.EXPIRES);
-            v.remove(TopRated.COLS.RANK);
-            db.insert(Contract.TableNames.MOVIES, null, v);
-            db.insert(tableName, null, listValues);
+            db.setTransactionSuccessful();
+        }finally{
+            db.endTransaction();
         }
         mContentResolver.notifyChange(Contract.Movies.URI, null);
         mContentResolver.notifyChange(uri, null);
@@ -69,11 +75,17 @@ public class MovieProvider extends ContentProvider {
     }
 
     private int bulkHelper(String tableName, Uri uri, ContentValues[] values) {
-        for (ContentValues v : values) {
-            if (v == null) {
-                continue;
+        db.beginTransaction();
+        try {
+            for (ContentValues v : values) {
+                if (v == null) {
+                    continue;
+                }
+                db.insert(tableName, null, v);
             }
-            db.insert(tableName, null, v);
+            db.setTransactionSuccessful();
+        }finally{
+            db.endTransaction();
         }
         mContentResolver.notifyChange(uri, null);
         return values.length;

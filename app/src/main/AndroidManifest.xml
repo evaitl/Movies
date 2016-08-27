@@ -33,7 +33,7 @@
         </activity>
 
         <service
-            android:name=".sync.MoviesAuthenticatorService">
+            android:name=".sync.StubAuthenticatorService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator"/>
             </intent-filter>

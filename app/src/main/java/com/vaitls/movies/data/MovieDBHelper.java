@@ -13,7 +13,7 @@ import android.util.Log;
 class MovieDBHelper extends SQLiteOpenHelper {
     private static final String TAG = MovieDBHelper.class.getSimpleName();
     private static final String DATABASE_NAME = "movies.db";
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 2;
 
     public MovieDBHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -42,6 +42,12 @@ class MovieDBHelper extends SQLiteOpenHelper {
         onUpgrade(db, oldVersion, newVersion);
     }
 
+    /**
+     * I know I'm gonna get crap for actually writing sql here instead of a mix of sql and
+     * table names from the Contract. IMHO it is much easier to just read the sql here.
+     *
+     * @param db
+     */
     @Override
     public void onCreate(SQLiteDatabase db) {
         Log.d(TAG, "creating tables");
@@ -52,12 +58,11 @@ class MovieDBHelper extends SQLiteOpenHelper {
                 "_id integer primary key autoincrement, " +
                 "mid integer not null unique on conflict replace, " +
                 "title text not null, " +
-                "plot text not null, " +
+                "plot text not null default \"\", " +
                 "poster_path text not null," +
                 "release_date text not null," +
-                "vote_count integer not null," +
-                "vote_average real not null," +
-
+                "vote_count integer not null default 0," +
+                "vote_average real not null default 0.0," +
                 "genres text not null" +
                 ");");
 
@@ -65,11 +70,13 @@ class MovieDBHelper extends SQLiteOpenHelper {
             "create table favorites(" +
                 "_id integer primary key autoincrement," +
                 "mid integer not null unique on conflict replace," +
-                "favorite integer not null default 0" +
+                "favorite integer not null default 0," +
+                "foreign key (mid) references movies(mid)"+
                 ");");
 
 /**
- I feel bad about this. By all SQL theory, we should have a genres table and do a join,
+ I feel bad about this. By all SQL theory, we should have a genres table and do a
+ multi-join between movies, genres, and genre_names,
  but it is just too much work for the payback. Instead I'm putting the genre ids
  in a text column in the movies table. When we look at a movies row,
  we'll convert the ids to strings from the genre_names table.
@@ -87,7 +94,9 @@ class MovieDBHelper extends SQLiteOpenHelper {
                 "_id integer primary key autoincrement," +
                 "rank integer not null," +
                 "mid integer not null unique on conflict replace," +
-                "expires integer not null);");
+                "expires integer not null,"+
+                "foreign key (mid) references movies(mid)"+
+                ");");
 
         /*
 I'm not setting the ranks in the lists as unique because data will be fetched
@@ -104,7 +113,9 @@ NBD.
                 "_id integer primary key autoincrement, " +
                 "rank integer not null, " +
                 "mid integer not null unique on conflict replace," +
-                "expires integer not null);");
+                "expires integer not null,"+
+                "foreign key(mid) references movies(mid)"+
+                ");");
 
         // movie/<mid>/videos
         db.execSQL("create table videos(" +
@@ -114,17 +125,19 @@ NBD.
                        "iso_639_1 text not null," +
                        "name text not null," +
                        "site text not null," +
-                       "key text not null," +
-                       "size integer not null" +
+                       "key text not null default \"\"," +
+                       "size integer not null," +
+                       "foreign key(mid) references movies(mid)"+
                        ");");
         // movie/<mid>/reviews
         db.execSQL("create table reviews(" +
                        "_id integer primary key autoincrement," +
                        "mid integer not null," +
                        "rid text not null unique on conflict replace," +
-                       "author text not null," +
+                       "author text not null default \"(anon)\"," +
                        "content text not null," +
-                       "url text not null" +
+                       "url text not null default \"\"," +
+                       "foreign key(mid) references movies(mid)"+
                        ");");
 
         // genre/movie/list?api_key=XXX
