@@ -66,7 +66,7 @@ public class MovieProvider extends ContentProvider {
                 db.insert(tableName, null, listValues);
             }
             db.setTransactionSuccessful();
-        }finally{
+        } finally {
             db.endTransaction();
         }
         mContentResolver.notifyChange(Contract.Movies.URI, null);
@@ -84,7 +84,7 @@ public class MovieProvider extends ContentProvider {
                 db.insert(tableName, null, v);
             }
             db.setTransactionSuccessful();
-        }finally{
+        } finally {
             db.endTransaction();
         }
         mContentResolver.notifyChange(uri, null);
@@ -113,7 +113,7 @@ public class MovieProvider extends ContentProvider {
             case MatcherIdxs.VIDEOS:
                 return bulkHelper(Contract.TableNames.VIDEOS, Videos.URI, values);
             case MatcherIdxs.GENRE_NAMES:
-                return bulkHelper(Contract.TableNames.GENRE_NAMES, GenreNames.URI,values);
+                return bulkHelper(Contract.TableNames.GENRE_NAMES, GenreNames.URI, values);
         }
         return super.bulkInsert(uri, values);
     }

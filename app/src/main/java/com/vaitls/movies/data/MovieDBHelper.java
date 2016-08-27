@@ -71,7 +71,7 @@ class MovieDBHelper extends SQLiteOpenHelper {
                 "_id integer primary key autoincrement," +
                 "mid integer not null unique on conflict replace," +
                 "favorite integer not null default 0," +
-                "foreign key (mid) references movies(mid)"+
+                "foreign key (mid) references movies(mid)" +
                 ");");
 
 /**
@@ -94,8 +94,8 @@ class MovieDBHelper extends SQLiteOpenHelper {
                 "_id integer primary key autoincrement," +
                 "rank integer not null," +
                 "mid integer not null unique on conflict replace," +
-                "expires integer not null,"+
-                "foreign key (mid) references movies(mid)"+
+                "expires integer not null," +
+                "foreign key (mid) references movies(mid)" +
                 ");");
 
         /*
@@ -113,8 +113,8 @@ NBD.
                 "_id integer primary key autoincrement, " +
                 "rank integer not null, " +
                 "mid integer not null unique on conflict replace," +
-                "expires integer not null,"+
-                "foreign key(mid) references movies(mid)"+
+                "expires integer not null," +
+                "foreign key(mid) references movies(mid)" +
                 ");");
 
         // movie/<mid>/videos
@@ -127,7 +127,7 @@ NBD.
                        "site text not null," +
                        "key text not null default \"\"," +
                        "size integer not null," +
-                       "foreign key(mid) references movies(mid)"+
+                       "foreign key(mid) references movies(mid)" +
                        ");");
         // movie/<mid>/reviews
         db.execSQL("create table reviews(" +
@@ -137,7 +137,7 @@ NBD.
                        "author text not null default \"(anon)\"," +
                        "content text not null," +
                        "url text not null default \"\"," +
-                       "foreign key(mid) references movies(mid)"+
+                       "foreign key(mid) references movies(mid)" +
                        ");");
 
         // genre/movie/list?api_key=XXX
