@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="10dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/author_label"
+            android:textStyle="bold"/>
+        <TextView
+            android:id="@+id/review_item_author_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="Edsgar Dikstra"
+            android:paddingLeft="5dp"/>
+    </LinearLayout>
+   <!-- <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="5dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/url_label"/>
+        <TextView
+            android:id="@+id/review_item_url_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            tools:text="http://foo.bar.com/someplace or other..."
+            android:paddingLeft="5dp"/>
+    </LinearLayout>-->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/review_label"
+        android:textStyle="bold"
+        android:paddingTop="5dp"/>
+    <TextView
+        android:id="@+id/review_item_content_text_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:text="Some long winded review that really says nothing. Ipso lorem factotum... Gotos are not considered harmful if you spend enough time writing assembly code instead of tossing eggs off of ivory towers."
+        android:paddingTop="10dp"/>
+
+</LinearLayout>

@@ -2,6 +2,7 @@ package com.vaitls.movies.ui;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -18,6 +19,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -260,6 +262,8 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
         private TextView mPlotTextView;
         private ImageView mThumbnail;
         private TextView mGenresTextView;
+        private Button mReviewsButton;
+        private Button mVideosButton;
         private int mMid;
         private boolean mFavorite;
 
@@ -274,6 +278,8 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             mPlotTextView = (TextView) v.findViewById(R.id.fragment_details_plot_text_view);
             mThumbnail = (ImageView) v.findViewById(R.id.fragment_details_thubnail_image_view);
             mGenresTextView = (TextView) v.findViewById(R.id.fragment_details_genre_text_view);
+            mReviewsButton=(Button) v.findViewById(R.id.fragment_details_reviews_button);
+            mVideosButton=(Button) v.findViewById(R.id.fragment_details_videos_button);
         }
 
         /**
@@ -318,7 +324,14 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
             mTitleTextView.setText(cursor.getString(Favorites.IDX.TITLE));
             mGenresTextView.setText(GenreNameMapper.map(cursor.getString(Favorites.IDX.GENRES)));
             setFavoriteImage(mMid, mFavorite);
-
+            mReviewsButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d(TAG,"onClick Reviews");
+                    Intent intent=ReviewsActivity.newIntent(getContext(), mMid);
+                    startActivity(intent);
+                }
+            });
 
             String uri = "http://image.tmdb.org/t/p/w185" +
                 cursor.getString(Favorites.IDX.POSTER_PATH);

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+I'll get rid of the LinearLayout once I'm sure I don't want
+any more views here.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+<TextView
+    android:id="@+id/trailer_item_name_text_view"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:text="Trailer #1"
+    android:layout_marginBottom="20dp"
+    android:layout_marginTop="20dp"
+    />
+</LinearLayout>

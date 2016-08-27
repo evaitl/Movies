@@ -16,4 +16,7 @@
     <string name="genres_label">Genres:</string>
     <string name="reviews">Reviews</string>
     <string name="videos">Videos</string>
+    <string name="author_label">Author:</string>
+    <string name="url_label">Url:</string>
+    <string name="review_label">Review:</string>
 </resources>
