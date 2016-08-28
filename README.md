@@ -49,7 +49,10 @@ The `.sync.MoviesSyncService` is just a couple of lines of code to create a `Mov
 `.sync.MoviesSyncAdapter` contains all of the real code for synchronization. The moviedb api
 returns 20 movies per page when fetching the toprated or popular lists. By default,
 `MoviesSyncAdapter` will fetch 5 pages at a time from each list up to a MAX_PAGE=50. Every
-SYNC_FLEXTIME (6 hrs +- 3hrs)
+SYNC_FLEXTIME (6 hrs +- 3hrs). An initial sync happens on application startup. All network
+api calls are made using retrofit2.
+
+
 
 ## UI
 
@@ -70,7 +73,7 @@ details on a small screen. Scrolling side to side brings in details of different
 Side to side scroll is infinite (up to the number of movies).
 
 A view pager locks in full pages on the screen by snapping them into place. I like that behavior
-so I'm doing it here by subclassing `RecyclerView.OnScrollListener`` and using it to snap
+so I'm doing it here by subclassing `RecyclerView.OnScrollListener` and using it to snap
 full details pages into place when the scrolling has stopped.
 
 Details and Posters are Fragments with retainInstance true, so they should go through rotations
@@ -96,5 +99,7 @@ Lot's of things come to mind:
 * We should fetch new genre names occasionally.
 * Once we get trailers/reviews and cache them, we don't fetch them again. Should
   do that at some point.
-* I should hook in stetho and do some more analysis.   
+* Should do a settings activity to control (among other things) when and how much data
+  fetching to do.
+* I should hook in stetho and do some more analysis.
 

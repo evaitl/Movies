@@ -252,13 +252,7 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
                     Log.i(TAG, "Failed fetching pop page " + nextPopPage);
                     break;
                 }
-                long expires = 0;
-                Date d = rp.headers().getDate("expires");
-                if (d == null) {
-                    expires = (new Date()).getTime() / 1000 + 24 * 60 * 60;
-                } else {
-                    expires = d.getTime() / 1000;
-                }
+                long expires = getExpires(rp);
                 MoviePage moviePage = rp.body();
                 maxPopPage = min(moviePage.getTotal_pages(), MAX_PAGE);
                 saveBulk(moviePage, expires, Contract.Popular.URI);
@@ -278,16 +272,9 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
                     Log.i(TAG, "Failed fetching TR page " + nextTRPage);
                     break;
                 }
-                long expires = 0;
-                Date d = rp.headers().getDate("expires");
-                if (d == null) {
-                    expires = (new Date()).getTime() / 1000 + 24 * 60 * 60;
-                } else {
-                    expires = d.getTime() / 1000;
-                }
+                long expires = getExpires(rp);
                 MoviePage moviePage = rp.body();
                 maxTrPage = min(moviePage.getTotal_pages(), MAX_PAGE);
-                // Assumes each page has the same number of movies.
                 saveBulk(moviePage, expires, TopRated.URI);
                 lastTrPage = nextTRPage++;
             }
@@ -295,7 +282,17 @@ public class MoviesSyncAdapter extends AbstractThreadedSyncAdapter {
             Log.e(TAG, "Error in prefetch", e);
         }
     }
-
+    private long getExpires(Response<MoviePage> rp){
+        long expires;
+        Date d = rp.headers().getDate("expires");
+        if (d == null) {
+            // 24 hours from now.
+            expires = (new Date()).getTime() / 1000 + 24 * 60 * 60;
+        } else {
+            expires = d.getTime() / 1000;
+        }
+        return expires;
+    }
     @Override
     public void onPerformSync(Account account, Bundle extras, String authority,
                               ContentProviderClient provider, SyncResult syncResult) {
