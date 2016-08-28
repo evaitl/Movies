@@ -33,6 +33,9 @@ import com.vaitls.movies.data.GenreNameMapper;
 
 import java.util.Locale;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 import static com.vaitls.movies.data.Contract.Favorites;
 
 /**
@@ -54,7 +57,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
     private MovieListType mSearchOrder;
     private DetailsAdapter mDetailsAdapter;
     private int mIndex;
-    private RecyclerView mRecyclerView;
+    @BindView(R.id.full_page_recycler_view) RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
     private MovieActivity mMovieActivity;
 
@@ -149,7 +152,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
                              @Nullable Bundle savedInstanceState) {
 
         View v = inflater.inflate(R.layout.recycler_view, container, false);
-        mRecyclerView = (RecyclerView) v.findViewById(R.id.full_page_recycler_view);
+        ButterKnife.bind(this,v);
         mLayoutManager = new LinearLayoutManager(getActivity(),
                                                  LinearLayoutManager.HORIZONTAL, false);
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -266,31 +269,31 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
         private final int LOADER_FAVORITES = 1;
         private final int LOADER_REVIEWS = 2;
         private final int LOADER_TRAILERS = 3;
-        private TextView mTitleTextView;
-        private TextView mDateTextView;
-        private TextView mRatingTextView;
-        private ImageButton mFavoriteButton;
-        private TextView mPlotTextView;
-        private ImageView mThumbnail;
-        private TextView mGenresTextView;
-        private Button mReviewsButton;
-        private Button mVideosButton;
+        /**
+         * I'm not convinced this butterknife thing is a good idea. It moves the binding
+         * from the code to the declaration, but the runtime inserts the almost the same code
+         * back I would have written into the runtime.
+         *
+         * The downside is that I no longer see the code because the code that is run is not
+         * what I see here in the editor. 
+         *
+         */
+        @BindView(R.id.fragment_details_title_text_view)  TextView mTitleTextView;
+        @BindView(R.id.fragment_details_date_text_view)  TextView mDateTextView;
+        @BindView(R.id.fragment_details_rating_text_view)  TextView mRatingTextView;
+        @BindView(R.id.fragment_details_favorite_image_button)  ImageButton mFavoriteButton;
+        @BindView(R.id.fragment_details_plot_text_view)  TextView mPlotTextView;
+        @BindView(R.id.fragment_details_thubnail_image_view)  ImageView mThumbnail;
+        @BindView(R.id.fragment_details_genre_text_view)  TextView mGenresTextView;
+        @BindView(R.id.fragment_details_reviews_button)  Button mReviewsButton;
+        @BindView(R.id.fragment_details_videos_button)  Button mVideosButton;
         private int mMid;
         private boolean mFavorite;
 
         public DetailsHolder(View v) {
             super(v);
-            mTitleTextView = (TextView) v.findViewById(R.id.fragment_details_title_text_view);
-            mDateTextView = (TextView) v.findViewById(R.id.fragment_details_date_text_view);
-            mRatingTextView = (TextView) v.findViewById(R.id.fragment_details_rating_text_view);
-            mFavoriteButton = (ImageButton) v.findViewById(
-                R.id.fragment_details_favorite_image_button);
+            ButterKnife.bind(this,v);
             mFavoriteButton.setOnClickListener(this);
-            mPlotTextView = (TextView) v.findViewById(R.id.fragment_details_plot_text_view);
-            mThumbnail = (ImageView) v.findViewById(R.id.fragment_details_thubnail_image_view);
-            mGenresTextView = (TextView) v.findViewById(R.id.fragment_details_genre_text_view);
-            mReviewsButton = (Button) v.findViewById(R.id.fragment_details_reviews_button);
-            mVideosButton = (Button) v.findViewById(R.id.fragment_details_videos_button);
         }
 
         /**

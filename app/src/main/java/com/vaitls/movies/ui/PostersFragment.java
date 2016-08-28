@@ -16,12 +16,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.vaitls.movies.data.MovieListType;
 import com.vaitls.movies.R;
 import com.vaitls.movies.data.Contract;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 import static com.vaitls.movies.data.Contract.Movies;
 
@@ -38,7 +42,7 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
     private static final int COL_POSTER_PATH = 1;
     private PhotoAdapter mPhotoAdapter;
     private MovieListType mSearchOrder;
-    private RecyclerView mPostersRecylerView;
+    @BindView(R.id.full_page_recycler_view) RecyclerView mPostersRecyclerView;
 
     public static PostersFragment newInstance() {
         return new PostersFragment();
@@ -51,8 +55,8 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
         }
     }
     void scrollTo(int idx){
-        if(mPostersRecylerView!=null){
-            mPostersRecylerView.smoothScrollToPosition(idx);
+        if(mPostersRecyclerView !=null){
+            mPostersRecyclerView.smoothScrollToPosition(idx);
         }
     }
 
@@ -67,13 +71,12 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
         }
         Log.d(TAG, "onCreateView");
         View v = inflater.inflate(R.layout.recycler_view, container, false);
-        mPostersRecylerView = (RecyclerView) v.findViewById(R.id.full_page_recycler_view);
-
+        ButterKnife.bind(this,v);
         Log.d(TAG, "setting adapter to " + mPhotoAdapter);
-        mPostersRecylerView.setAdapter(mPhotoAdapter);
+        mPostersRecyclerView.setAdapter(mPhotoAdapter);
         int columnWidthPx=(int)(getResources().getDimension(R.dimen.posters_col_width));
-        mPostersRecylerView.setLayoutManager(new GridAutofitLayoutManager(getActivity(), columnWidthPx));
-        mPostersRecylerView.setHasFixedSize(true);
+        mPostersRecyclerView.setLayoutManager(new GridAutofitLayoutManager(getActivity(), columnWidthPx));
+        mPostersRecyclerView.setHasFixedSize(true);
         return v;
     }
 
