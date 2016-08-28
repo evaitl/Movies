@@ -90,6 +90,14 @@ Rather than fix the number of columns in the PostersFragment, I fix the column w
 scale to pixels and have a GridAutoFitLayoutManager subclass of GridLayoutManager. The number
 of columns in the PostersFragment will vary from device to device.
 
+## Screenshots
+
+![Tablet Landscape](http://vaitls.com/share/Screenshot_20160827-221620.png)
+![Tablet Portrat](http://vaitls.com/share/Screenshot_20160827-221642.png)
+![Cell Gallery](http://vaitls.com/share/Screenshot_20160827-221722.png)
+![Cell Details](http://vaitls.com/share/Screenshot_20160827-221733.png)
+
+
 ## TODO
 
 
@@ -102,4 +110,5 @@ Lot's of things come to mind:
 * Should do a settings activity to control (among other things) when and how much data
   fetching to do.
 * I should hook in stetho and do some more analysis.
+* General code cleanup. Get rid of a lot of the useless logging.
 

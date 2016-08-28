@@ -8,7 +8,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
-import com.vaitls.movies.MovieListType;
+import com.vaitls.movies.data.MovieListType;
 import com.vaitls.movies.R;
 
 /**

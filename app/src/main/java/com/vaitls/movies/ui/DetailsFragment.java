@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.CursorLoader;
@@ -25,7 +26,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.vaitls.movies.MovieListType;
+import com.vaitls.movies.data.MovieListType;
 import com.vaitls.movies.R;
 import com.vaitls.movies.data.Contract;
 import com.vaitls.movies.data.GenreNameMapper;
@@ -55,6 +56,7 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
     private int mIndex;
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager mLayoutManager;
+    private MovieActivity mMovieActivity;
 
     public static DetailsFragment newInstance(MovieListType searchOrder, int idx) {
         DetailsFragment fragment = new DetailsFragment();
@@ -159,6 +161,10 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+        FragmentActivity fa= getActivity();
+        if(fa instanceof  MovieActivity){
+            mMovieActivity=(MovieActivity) fa;
+        }
         Bundle bundle = getArguments();
         mSearchOrder = (MovieListType) bundle.getSerializable(ARG_SO);
         if (mSearchOrder == null) {
@@ -192,6 +198,9 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
                     mIndex = lm.findLastVisibleItemPosition();
                 }
                 recyclerView.smoothScrollToPosition(mIndex);
+                if(mMovieActivity!=null){
+                    mMovieActivity.detailsItemSettled(mIndex);
+                }
                 mSettling = true;
                 /**
                  * <a href="https://developer.android.com/reference/android/support/v7/widget/RecyclerView.html">

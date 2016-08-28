@@ -11,7 +11,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,7 +19,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-import com.vaitls.movies.MovieListType;
+import com.vaitls.movies.data.MovieListType;
 import com.vaitls.movies.R;
 import com.vaitls.movies.data.Contract;
 
@@ -51,7 +50,11 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
             getLoaderManager().initLoader(mSearchOrder.ordinal(), null, this);
         }
     }
-
+    void scrollTo(int idx){
+        if(mPostersRecylerView!=null){
+            mPostersRecylerView.smoothScrollToPosition(idx);
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater,

@@ -1,4 +1,4 @@
-package com.vaitls.movies;
+package com.vaitls.movies.data;
 
 /**
  * Created by evaitl on 7/31/16.

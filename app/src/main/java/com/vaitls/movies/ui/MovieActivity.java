@@ -10,7 +10,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 
-import com.vaitls.movies.MovieListType;
+import com.vaitls.movies.data.MovieListType;
 import com.vaitls.movies.R;
 import com.vaitls.movies.data.GenreNameMapper;
 import com.vaitls.movies.sync.MoviesSyncAdapter;
@@ -31,12 +31,12 @@ public class MovieActivity extends AppCompatActivity {
         }
     }
 
-    void detailsItemSelected(int idx) {
-        /*
-        if(mPostersFragment){
-            TODO  mPostersFragment.setIndex(idx);
+    void detailsItemSettled(int idx) {
+
+        if(mPostersFragment!=null){
+            mPostersFragment.scrollTo(idx);
         }
-        */
+
     }
 
     @Override
@@ -79,13 +79,8 @@ public class MovieActivity extends AppCompatActivity {
         MoviesSyncAdapter.initializeSyncAdapter(this);
         // main is a resource value based on screen size. It points at
         // either single or two fragment layout.
-        setContentView(R.layout.main);
+        setContentView(R.layout.activity_main);
         FragmentManager fm = getSupportFragmentManager();
-        Log.d(TAG,
-              "main " + R.layout.main + " asf " + R.layout.activity_single_fragment + " atf " + R
-                  .layout.activity_two_fragment);
-        Log.d(TAG, "fc: " + findViewById(R.id.fragment_container));
-        Log.d(TAG, "lfc: " + findViewById(R.id.left_fragment_container));
         if (findViewById(R.id.fragment_container) != null) { // single fragment
             Log.d(TAG, "one frag");
             mPostersFragment = (PostersFragment) fm.findFragmentById(R.id.fragment_container);

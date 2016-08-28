@@ -16,7 +16,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.vaitls.movies.MovieListType;
+import com.vaitls.movies.data.MovieListType;
 import com.vaitls.movies.R;
 import com.vaitls.movies.data.Contract;
 
