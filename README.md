@@ -90,15 +90,21 @@ Rather than fix the number of columns in the PostersFragment, I fix the column w
 scale to pixels and have a GridAutoFitLayoutManager subclass of GridLayoutManager. The number
 of columns in the PostersFragment will vary from device to device.
 
+As you scroll through either the gallery or the details fragments on a tablet, the other fragment
+is scrolled to the same position.
+
 ## Screenshots
 
 Tablet shots:
+
 ![Tablet Landscape](http://vaitls.com/share/small_img620.png)
+
 ![Tablet Portrat](http://vaitls.com/share/small_img642.png )
 
 Cell shots:
 
 ![Cell Gallery](http://vaitls.com/share/small_img722.png)
+
 ![Cell Details](http://vaitls.com/share/small_img733.png)
 
 
