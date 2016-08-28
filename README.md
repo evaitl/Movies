@@ -8,7 +8,7 @@ The app source is divided into data, ui, and sync. I'll cover each in turn.
 I am not an artsy GUI person, so this won't win any design awards. I took this as a learning
 project to pick up how to write a ContentProvider, a SyncAdapter, various Fragment based
 Activities that handle both the Activity and Fragment life cycles.  I took some care
-  to make sure no database query() or insert() calls were made on the UI thread.
+to make sure no database query() or insert() calls were made on the UI thread.
 
 ## Data
 
@@ -53,9 +53,48 @@ SYNC_FLEXTIME (6 hrs +- 3hrs)
 
 ## UI
 
+I really like `RecyclerView`, but there is no `RecyclerView.Adapter` for `Cursor`. I grabbed
+some stuff off of stackoverflow and subclassed RecyclerView.Adapter for a
+`.ui.RecyclerViewCursorAdapter`.  I'm using this for both the posters grid layout and for
+ the individual pages of the details view.
+
+I like the `support.v4.view.ViewPager`. However, it won't take a `RecyclerView.Adapter` and the
+2K+ detail fragments in memory didn't sound like a good idea.
+
+For the details fragment I am doing a full page `ScrollView` for the individual details pages
+ and putting it in a `RecyclerView` with a horizontal `LinearLayoutManager`
+using the local `.ui.RecyclerViewCursorAdapter`.
+
+This seems to do what you would want. If you scroll up or down, you can see all of the
+details on a small screen. Scrolling side to side brings in details of different movies.
+Side to side scroll is infinite (up to the number of movies).
+
+A view pager locks in full pages on the screen by snapping them into place. I like that behavior
+so I'm doing it here by subclassing `RecyclerView.OnScrollListener`` and using it to snap
+full details pages into place when the scrolling has stopped.
+
+Details and Posters are Fragments with retainInstance true, so they should go through rotations
+fine or jumping to other activities and back.
+
+Reviews and trailers are both displayed in very simple ListActivities that are kicked off by
+buttons in the Details fragment. I didn't want to put details and trailers directly in the
+DetaislFragment because that would kick off network API calls for every detail that we
+looked at. Just bring them if somebody cares.
+
+I'm using Glide to load thumbnails and such for posters or details images.
+
+Rather than fix the number of columns in the PostersFragment, I fix the column width in dp,
+scale to pixels and have a GridAutoFitLayoutManager subclass of GridLayoutManager. The number
+of columns in the PostersFragment will vary from device to device.
 
 ## TODO
 
 
+Lot's of things come to mind:
 
+* We should prune the database if/when it gets too big.
+* We should fetch new genre names occasionally.
+* Once we get trailers/reviews and cache them, we don't fetch them again. Should
+  do that at some point.
+* I should hook in stetho and do some more analysis.   
 
