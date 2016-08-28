@@ -4,7 +4,9 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="no_network_font_size">30sp</dimen>
     <integer name="columns">3</integer>
-    <dimen name="detail_image_width">120dp</dimen>
+    <dimen name="posters_col_width">100dp</dimen>
+    <dimen name="posters_col_height">150dp</dimen>
+    <dimen name="detail_image_width">100dp</dimen>
     <dimen name="detail_image_height">200dp</dimen>
     <dimen name="detail_image_padding">10dp</dimen>
     <dimen name="detail_padding_top">5dp</dimen>

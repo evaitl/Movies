@@ -71,9 +71,8 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
 
         Log.d(TAG, "setting adapter to " + mPhotoAdapter);
         mPostersRecylerView.setAdapter(mPhotoAdapter);
-        float density=getResources().getDisplayMetrics().density;
-        int xxx=(int)(100*density);
-        mPostersRecylerView.setLayoutManager(new GridAutofitLayoutManager(getActivity(), xxx));
+        int columnWidthPx=(int)(getResources().getDimension(R.dimen.posters_col_width));
+        mPostersRecylerView.setLayoutManager(new GridAutofitLayoutManager(getActivity(), columnWidthPx));
         mPostersRecylerView.setHasFixedSize(true);
         return v;
     }
@@ -158,6 +157,7 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
 
         void bindImageInfo(String posterPath) {
             String uri = "http://image.tmdb.org/t/p/w185" + posterPath;
+            Log.d(TAG,"poster path: "+posterPath);
             Glide.with(getContext())
                 .load(uri)
                 .placeholder(R.mipmap.ic_launcher)
