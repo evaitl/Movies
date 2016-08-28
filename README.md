@@ -92,10 +92,14 @@ of columns in the PostersFragment will vary from device to device.
 
 ## Screenshots
 
-![Tablet Landscape](http://vaitls.com/share/Screenshot_20160827-221620.png =400x)
-![Tablet Portrat](http://vaitls.com/share/Screenshot_20160827-221642.png =400x)
-![Cell Gallery](http://vaitls.com/share/Screenshot_20160827-221722.png =400x)
-![Cell Details](http://vaitls.com/share/Screenshot_20160827-221733.png =400x)
+Tablet shots:
+![Tablet Landscape](http://vaitls.com/share/small_img620.png)
+![Tablet Portrat](http://vaitls.com/share/small_img642.png )
+
+Cell shots:
+
+![Cell Gallery](http://vaitls.com/share/small_img722.png)
+![Cell Details](http://vaitls.com/share/small_img733.png)
 
 
 ## TODO
