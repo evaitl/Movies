@@ -275,7 +275,13 @@ public class DetailsFragment extends Fragment implements LoaderManager.LoaderCal
          * back I would have written into the runtime.
          *
          * The downside is that I no longer see the code because the code that is run is not
-         * what I see here in the editor. 
+         * what I see here in the editor.
+         *
+         * One of my 'favorite' things about C++ is that you never know without a full code
+         * inspection if the code that is running has ANY relationship with what you see
+         * in source. Every single operator can be turned into
+         * "go spawn xconq (OK - old, minecraft then)" behind the scenes. Why do that to java
+         * with annotations?
          *
          */
         @BindView(R.id.fragment_details_title_text_view)  TextView mTitleTextView;
