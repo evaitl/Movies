@@ -36,8 +36,8 @@ public class TrailersActivity extends ListActivity implements TrailerLoader.Trai
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_trailers);
         mMid = getIntent().getIntExtra(EXTRA_MID, 0);
-        getListView().setEmptyView(findViewById(R.id.no_trailers_text_view));
         String[] cnames = {Videos.COLS.NAME};
         int[] views = {R.id.trailer_item_name_text_view};
         mAdapter = new SimpleCursorAdapter(this, R.layout.trailers_item, null,
@@ -76,11 +76,6 @@ public class TrailersActivity extends ListActivity implements TrailerLoader.Trai
     @Override
     public void onTrailersLoaded(Cursor cursor) {
         mTrailerLoader = null;
-        if(cursor==null || cursor.getCount()==0){
-            Log.i(TAG,"No reviews for "+mMid);
-            Toast.makeText(getApplicationContext(),
-                           R.string.no_trailers_avail, Toast.LENGTH_LONG).show();
-        }
         mAdapter.swapCursor(cursor);
     }
 }

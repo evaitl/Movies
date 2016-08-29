@@ -160,7 +160,6 @@ public class PostersFragment extends Fragment implements LoaderManager.LoaderCal
 
         void bindImageInfo(String posterPath) {
             String uri = "http://image.tmdb.org/t/p/w185" + posterPath;
-            Log.d(TAG,"poster path: "+posterPath);
             Glide.with(getContext())
                 .load(uri)
                 .placeholder(R.mipmap.ic_launcher)
